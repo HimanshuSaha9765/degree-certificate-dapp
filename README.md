@@ -13,7 +13,7 @@
 
 ## 🌐 Live Demo
 
-🔗 **[Try CertChain Live →](https://your-vercel-url.vercel.app)**
+🔗 **[Try CertChain Live →](degree-certificate-dapp.vercel.app)**
 
 | Role        | What You Can Do                                  |
 | ----------- | ------------------------------------------------ |
