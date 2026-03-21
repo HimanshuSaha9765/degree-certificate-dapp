@@ -1,0 +1,1680 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Certificate Preview — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+    <!-- Cursive font for typed signature -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pinyon+Script&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge issuer">Issuer</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="issuer-dashboard.html" class="btn btn-ghost btn-sm">
+              ← Dashboard
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <div class="container-lg">
+          <!-- Page Header -->
+          <div class="section-header" style="margin-bottom: 28px">
+            <div style="font-size: 2.5rem; margin-bottom: 10px">🖨️</div>
+            <h2>Certificate Generator</h2>
+            <p>Add your signature and download the certificate as PDF</p>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 360px;
+              gap: 28px;
+              align-items: start;
+            "
+          >
+            <!-- ══════════════════════════════
+             LEFT — CERTIFICATE PREVIEW
+        ══════════════════════════════ -->
+            <div>
+              <!-- THE ACTUAL CERTIFICATE (this gets exported to PDF) -->
+              <div
+                id="certificateDoc"
+                style="
+                  background: #fffdf5;
+                  border: 3px solid #c9993a;
+                  border-radius: 8px;
+                  padding: 48px 56px;
+                  position: relative;
+                  overflow: hidden;
+                  font-family: &quot;Playfair Display&quot;, Georgia, serif;
+                  box-shadow: 0 8px 40px rgba(26, 58, 92, 0.15);
+                  min-height: 560px;
+                "
+              >
+                <!-- Corner decorations -->
+                <div
+                  style="
+                    position: absolute;
+                    top: 12px;
+                    left: 12px;
+                    width: 50px;
+                    height: 50px;
+                    border-top: 3px solid #c9993a;
+                    border-left: 3px solid #c9993a;
+                    border-radius: 4px 0 0 0;
+                  "
+                ></div>
+                <div
+                  style="
+                    position: absolute;
+                    top: 12px;
+                    right: 12px;
+                    width: 50px;
+                    height: 50px;
+                    border-top: 3px solid #c9993a;
+                    border-right: 3px solid #c9993a;
+                    border-radius: 0 4px 0 0;
+                  "
+                ></div>
+                <div
+                  style="
+                    position: absolute;
+                    bottom: 12px;
+                    left: 12px;
+                    width: 50px;
+                    height: 50px;
+                    border-bottom: 3px solid #c9993a;
+                    border-left: 3px solid #c9993a;
+                    border-radius: 0 0 0 4px;
+                  "
+                ></div>
+                <div
+                  style="
+                    position: absolute;
+                    bottom: 12px;
+                    right: 12px;
+                    width: 50px;
+                    height: 50px;
+                    border-bottom: 3px solid #c9993a;
+                    border-right: 3px solid #c9993a;
+                    border-radius: 0 0 4px 0;
+                  "
+                ></div>
+
+                <!-- Background watermark -->
+                <!-- Background watermark -->
+                <div
+                  id="certWatermark"
+                  style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(-30deg);
+                    font-size: 8rem;
+                    opacity: 0.03;
+                    pointer-events: none;
+                    user-select: none;
+                    font-family: &quot;Playfair Display&quot;, serif;
+                    color: #1a3a5c;
+                    white-space: nowrap;
+                  "
+                >
+                  CERTCHAIN
+                </div>
+
+                <!-- Header row: Logo + Title + Seal -->
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 32px;
+                  "
+                >
+                  <!-- Institution Logo -->
+                  <div
+                    id="certLogo"
+                    style="
+                      width: 80px;
+                      height: 80px;
+                      border-radius: 8px;
+                      overflow: hidden;
+                      border: 2px solid #e8d5a0;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      background: #f5edd0;
+                      font-size: 2rem;
+                    "
+                  >
+                    🏛️
+                  </div>
+
+                  <!-- Title -->
+                  <div style="text-align: center; flex: 1; padding: 0 20px">
+                    <div
+                      style="
+                        font-size: 11px;
+                        letter-spacing: 3px;
+                        text-transform: uppercase;
+                        color: #8a6a20;
+                        margin-bottom: 6px;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                    >
+                      Certificate of Achievement
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: #8a6a20;
+                        letter-spacing: 1px;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                      id="cert-institution-header"
+                    >
+                      —
+                    </div>
+                  </div>
+
+                  <!-- Seal placeholder -->
+                  <div
+                    style="
+                      width: 80px;
+                      height: 80px;
+                      border-radius: 50%;
+                      border: 3px solid #c9993a;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      flex-direction: column;
+                      background: linear-gradient(135deg, #fdf6e3, #f5edd0);
+                    "
+                  >
+                    <div style="font-size: 20px">🎓</div>
+                    <div
+                      style="
+                        font-size: 7px;
+                        color: #8a6a20;
+                        text-align: center;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      OFFICIAL
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Divider -->
+                <div
+                  style="
+                    height: 1px;
+                    background: linear-gradient(
+                      90deg,
+                      transparent,
+                      #c9993a,
+                      transparent
+                    );
+                    margin-bottom: 28px;
+                  "
+                ></div>
+
+                <!-- This is to certify -->
+                <div
+                  style="
+                    text-align: center;
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                    color: #5a4a20;
+                    font-family: &quot;DM Sans&quot;, sans-serif;
+                    letter-spacing: 0.5px;
+                  "
+                >
+                  This is to certify that
+                </div>
+
+                <!-- Student Name -->
+                <div style="text-align: center; margin-bottom: 12px">
+                  <span
+                    style="
+                      font-size: 2.2rem;
+                      font-weight: 700;
+                      color: #1a3a5c;
+                      border-bottom: 2px solid #c9993a;
+                      padding-bottom: 4px;
+                      display: inline-block;
+                    "
+                    id="cert-student-name"
+                    >Student Name</span
+                  >
+                </div>
+
+                <!-- Has successfully completed -->
+                <div
+                  style="
+                    text-align: center;
+                    margin-bottom: 8px;
+                    font-size: 13px;
+                    color: #5a4a20;
+                    font-family: &quot;DM Sans&quot;, sans-serif;
+                  "
+                >
+                  has successfully completed the requirements for the degree of
+                </div>
+
+                <!-- Degree -->
+                <div style="text-align: center; margin-bottom: 24px">
+                  <span
+                    style="
+                      font-size: 1.4rem;
+                      font-weight: 700;
+                      color: #1a3a5c;
+                      font-style: italic;
+                    "
+                    id="cert-degree"
+                    >Degree Programme</span
+                  >
+                </div>
+
+                <!-- Year + Cert ID row -->
+                <div
+                  style="
+                    display: flex;
+                    justify-content: center;
+                    gap: 40px;
+                    margin-bottom: 28px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 11px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: #8a6a20;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                        margin-bottom: 4px;
+                      "
+                    >
+                      Year
+                    </div>
+                    <div
+                      style="font-size: 16px; font-weight: 700; color: #1a3a5c"
+                      id="cert-year"
+                    >
+                      2024
+                    </div>
+                  </div>
+                  <div style="width: 1px; background: #e8d5a0"></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 11px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: #8a6a20;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                        margin-bottom: 4px;
+                      "
+                    >
+                      Issue Date
+                    </div>
+                    <div
+                      style="font-size: 14px; font-weight: 600; color: #1a3a5c"
+                      id="cert-issue-date"
+                    >
+                      —
+                    </div>
+                  </div>
+                  <div style="width: 1px; background: #e8d5a0"></div>
+                  <div style="text-align: center">
+                    <div
+                      style="
+                        font-size: 11px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: #8a6a20;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                        margin-bottom: 4px;
+                      "
+                    >
+                      Certificate ID
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        font-weight: 700;
+                        color: #1a3a5c;
+                        font-family: &quot;DM Mono&quot;, monospace;
+                      "
+                      id="cert-id"
+                    >
+                      —
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Divider -->
+                <div
+                  style="
+                    height: 1px;
+                    background: linear-gradient(
+                      90deg,
+                      transparent,
+                      #c9993a,
+                      transparent
+                    );
+                    margin-bottom: 24px;
+                  "
+                ></div>
+
+                <!-- Signature + QR row -->
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-end;
+                    gap: 20px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <!-- Signature area -->
+                  <div style="flex: 1; min-width: 160px">
+                    <div
+                      id="signatureDisplay"
+                      style="
+                        min-height: 60px;
+                        border-bottom: 2px solid #c9993a;
+                        margin-bottom: 6px;
+                        display: flex;
+                        align-items: flex-end;
+                        justify-content: center;
+                        padding: 8px;
+                      "
+                    >
+                      <span
+                        style="
+                          font-size: 12px;
+                          color: #c9993a;
+                          opacity: 0.5;
+                          font-family: &quot;DM Sans&quot;, sans-serif;
+                        "
+                      >
+                        Signature
+                      </span>
+                    </div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: #8a6a20;
+                        text-align: center;
+                        letter-spacing: 0.5px;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                    >
+                      Authorized Signatory
+                    </div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        color: #1a3a5c;
+                        text-align: center;
+                        font-weight: 600;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                      id="cert-institution-sig"
+                    >
+                      —
+                    </div>
+                  </div>
+
+                  <!-- Blockchain badge -->
+                  <div style="text-align: center; padding: 0 10px">
+                    <div
+                      style="
+                        font-size: 9px;
+                        color: #8a6a20;
+                        letter-spacing: 0.5px;
+                        margin-bottom: 4px;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                    >
+                      VERIFIED ON
+                    </div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        font-weight: 700;
+                        color: #1a3a5c;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                    >
+                      🔗 BLOCKCHAIN
+                    </div>
+                    <div
+                      style="
+                        font-size: 8px;
+                        color: #8a6a20;
+                        font-family: &quot;DM Mono&quot;, monospace;
+                        margin-top: 2px;
+                      "
+                    >
+                      Sepolia Testnet
+                    </div>
+                  </div>
+
+                  <!-- QR Code -->
+                  <div style="text-align: center">
+                    <div
+                      id="qrCodeContainer"
+                      style="
+                        width: 80px;
+                        height: 80px;
+                        background: #f5f5f5;
+                        border: 1px solid #e8d5a0;
+                        border-radius: 4px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 10px;
+                        color: #8a6a20;
+                        margin: 0 auto 4px;
+                      "
+                    >
+                      QR
+                    </div>
+                    <div
+                      style="
+                        font-size: 9px;
+                        color: #8a6a20;
+                        font-family: &quot;DM Sans&quot;, sans-serif;
+                      "
+                    >
+                      Scan to Verify
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- END CERTIFICATE DOC -->
+
+              <!-- Download button -->
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  margin-top: 20px;
+                  flex-wrap: wrap;
+                "
+              >
+                <button
+                  class="btn btn-accent btn-lg"
+                  id="downloadBtn"
+                  onclick="downloadPDF()"
+                >
+                  📥 Download PDF Certificate
+                </button>
+                <button class="btn btn-outline" onclick="window.print()">
+                  🖨️ Print
+                </button>
+                <a href="issuer-dashboard.html" class="btn btn-ghost">
+                  ← Back to Dashboard
+                </a>
+              </div>
+            </div>
+
+            <!-- ══════════════════════════════
+             RIGHT — SIGNATURE PANEL
+        ══════════════════════════════ -->
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                position: sticky;
+                top: 88px;
+              "
+            >
+              <!-- Signature Method Tabs -->
+              <div class="card" style="padding: 0; overflow: hidden">
+                <div
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--primary),
+                      var(--primary-light)
+                    );
+                    padding: 14px 20px;
+                  "
+                >
+                  <div style="font-size: 13px; font-weight: 600; color: white">
+                    ✍️ Add Signature
+                  </div>
+                </div>
+
+                <!-- Tabs -->
+                <div
+                  style="display: flex; border-bottom: 1px solid var(--border)"
+                >
+                  <button
+                    class="sig-tab active"
+                    id="tab-draw"
+                    onclick="switchTab('draw')"
+                    style="
+                      flex: 1;
+                      padding: 10px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      border: none;
+                      cursor: pointer;
+                      background: var(--primary-pale);
+                      color: var(--primary);
+                      border-bottom: 2px solid var(--primary);
+                    "
+                  >
+                    ✏️ Draw
+                  </button>
+                  <button
+                    class="sig-tab"
+                    id="tab-upload"
+                    onclick="switchTab('upload')"
+                    style="
+                      flex: 1;
+                      padding: 10px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      border: none;
+                      cursor: pointer;
+                      background: transparent;
+                      color: var(--text-muted);
+                      border-bottom: 2px solid transparent;
+                    "
+                  >
+                    📁 Upload
+                  </button>
+                  <button
+                    class="sig-tab"
+                    id="tab-type"
+                    onclick="switchTab('type')"
+                    style="
+                      flex: 1;
+                      padding: 10px;
+                      font-size: 12px;
+                      font-weight: 600;
+                      border: none;
+                      cursor: pointer;
+                      background: transparent;
+                      color: var(--text-muted);
+                      border-bottom: 2px solid transparent;
+                    "
+                  >
+                    Aa Type
+                  </button>
+                </div>
+
+                <div style="padding: 16px">
+                  <!-- ─── TAB: DRAW ─── -->
+                  <div id="panel-draw">
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                      "
+                    >
+                      Draw your signature below:
+                    </div>
+                    <canvas
+                      id="sigCanvas"
+                      width="300"
+                      height="120"
+                      style="
+                        border: 2px solid var(--border);
+                        border-radius: var(--radius-md);
+                        cursor: crosshair;
+                        width: 100%;
+                        touch-action: none;
+                        background: white;
+                      "
+                    >
+                    </canvas>
+                    <div style="display: flex; gap: 8px; margin-top: 10px">
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        onclick="clearCanvas()"
+                      >
+                        🗑️ Clear
+                      </button>
+                      <button
+                        class="btn btn-primary btn-sm"
+                        onclick="applyDrawSignature()"
+                      >
+                        ✅ Apply
+                      </button>
+                    </div>
+                    <!-- Pen color + size -->
+                    <div
+                      style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        margin-top: 10px;
+                        flex-wrap: wrap;
+                      "
+                    >
+                      <label style="font-size: 12px; color: var(--text-muted)">
+                        Color:
+                      </label>
+                      <input
+                        type="color"
+                        id="penColor"
+                        value="#1a3a5c"
+                        style="
+                          width: 32px;
+                          height: 28px;
+                          border: 1px solid var(--border);
+                          border-radius: 4px;
+                          cursor: pointer;
+                        "
+                        onchange="updatePen()"
+                      />
+                      <label style="font-size: 12px; color: var(--text-muted)">
+                        Size:
+                      </label>
+                      <input
+                        type="range"
+                        id="penSize"
+                        min="1"
+                        max="6"
+                        value="2"
+                        style="width: 80px"
+                        oninput="updatePen()"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- ─── TAB: UPLOAD ─── -->
+                  <div id="panel-upload" style="display: none">
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                      "
+                    >
+                      Upload a signature image (PNG with transparent background
+                      recommended):
+                    </div>
+                    <div
+                      style="
+                        border: 2px dashed var(--border);
+                        border-radius: var(--radius-md);
+                        padding: 24px;
+                        text-align: center;
+                        cursor: pointer;
+                        background: var(--bg-secondary);
+                      "
+                      onclick="document.getElementById('sigFile').click()"
+                    >
+                      <div style="font-size: 1.5rem; margin-bottom: 8px">
+                        🖼️
+                      </div>
+                      <div
+                        style="font-size: 13px; color: var(--text-secondary)"
+                      >
+                        Click to upload signature
+                      </div>
+                      <div
+                        style="
+                          font-size: 11px;
+                          color: var(--text-muted);
+                          margin-top: 4px;
+                        "
+                      >
+                        PNG, JPG — transparent BG preferred
+                      </div>
+                    </div>
+                    <input
+                      type="file"
+                      id="sigFile"
+                      accept="image/*"
+                      style="display: none"
+                      onchange="uploadSignature(event)"
+                    />
+                    <!-- Preview -->
+                    <div
+                      id="uploadSigPreview"
+                      style="
+                        display: none;
+                        margin-top: 12px;
+                        text-align: center;
+                      "
+                    >
+                      <img
+                        id="uploadSigImg"
+                        style="
+                          max-height: 80px;
+                          border: 1px solid var(--border);
+                          border-radius: var(--radius-sm);
+                          padding: 4px;
+                          background: white;
+                        "
+                        alt="Signature"
+                      />
+                      <div style="margin-top: 8px">
+                        <button
+                          class="btn btn-primary btn-sm"
+                          onclick="applyUploadSignature()"
+                        >
+                          ✅ Apply Signature
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- ─── TAB: TYPE ─── -->
+                  <div id="panel-type" style="display: none">
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                      "
+                    >
+                      Type your name — it will appear in cursive:
+                    </div>
+                    <input
+                      type="text"
+                      id="typedSig"
+                      class="form-control"
+                      placeholder="e.g. Dr. Rajesh Patel"
+                      oninput="updateTypedPreview()"
+                    />
+                    <!-- Font selector -->
+                    <div style="margin-top: 10px">
+                      <div
+                        style="
+                          font-size: 12px;
+                          color: var(--text-muted);
+                          margin-bottom: 6px;
+                        "
+                      >
+                        Choose style:
+                      </div>
+                      <div
+                        style="display: flex; flex-direction: column; gap: 8px"
+                      >
+                        <label
+                          style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            cursor: pointer;
+                          "
+                        >
+                          <input
+                            type="radio"
+                            name="sigFont"
+                            value="Dancing Script"
+                            checked
+                            onchange="updateTypedPreview()"
+                          />
+                          <span
+                            style="
+                              font-family: &quot;Dancing Script&quot;, cursive;
+                              font-size: 18px;
+                              color: var(--text-primary);
+                            "
+                          >
+                            Dancing Script
+                          </span>
+                        </label>
+                        <label
+                          style="
+                            display: flex;
+                            align-items: center;
+                            gap: 8px;
+                            cursor: pointer;
+                          "
+                        >
+                          <input
+                            type="radio"
+                            name="sigFont"
+                            value="Pinyon Script"
+                            onchange="updateTypedPreview()"
+                          />
+                          <span
+                            style="
+                              font-family: &quot;Pinyon Script&quot;, cursive;
+                              font-size: 22px;
+                              color: var(--text-primary);
+                            "
+                          >
+                            Pinyon Script
+                          </span>
+                        </label>
+                      </div>
+                    </div>
+                    <!-- Typed preview -->
+                    <div
+                      id="typedSigPreview"
+                      style="
+                        min-height: 60px;
+                        border: 1px solid var(--border);
+                        border-radius: var(--radius-md);
+                        margin-top: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        background: white;
+                        padding: 8px;
+                      "
+                    >
+                      <span
+                        id="typedSigText"
+                        style="
+                          font-family: &quot;Dancing Script&quot;, cursive;
+                          font-size: 28px;
+                          color: #1a3a5c;
+                        "
+                      >
+                        Your Signature
+                      </span>
+                    </div>
+                    <button
+                      class="btn btn-primary btn-sm"
+                      style="margin-top: 10px; width: 100%"
+                      onclick="applyTypedSignature()"
+                    >
+                      ✅ Apply Signature
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Certificate Info card -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <div class="icon">📋</div>
+                    Certificate Info
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px">
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 13px;
+                    "
+                  >
+                    <span style="color: var(--text-muted)">Student</span>
+                    <span
+                      style="font-weight: 600; color: var(--text-primary)"
+                      id="info-name"
+                      >—</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 13px;
+                    "
+                  >
+                    <span style="color: var(--text-muted)">Degree</span>
+                    <span
+                      style="
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        text-align: right;
+                        max-width: 180px;
+                      "
+                      id="info-degree"
+                      >—</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 13px;
+                    "
+                  >
+                    <span style="color: var(--text-muted)">Certificate ID</span>
+                    <span
+                      style="
+                        font-weight: 600;
+                        color: var(--primary);
+                        font-family: var(--font-mono);
+                        font-size: 11px;
+                      "
+                      id="info-id"
+                      >—</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 13px;
+                    "
+                  >
+                    <span style="color: var(--text-muted)">Institution</span>
+                    <span
+                      style="
+                        font-weight: 600;
+                        color: var(--text-primary);
+                        text-align: right;
+                        max-width: 160px;
+                      "
+                      id="info-institution"
+                      >—</span
+                    >
+                  </div>
+                  <div
+                    style="
+                      display: flex;
+                      justify-content: space-between;
+                      font-size: 13px;
+                    "
+                  >
+                    <span style="color: var(--text-muted)">Year</span>
+                    <span style="font-weight: 600" id="info-year">—</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- QR Info -->
+              <div class="alert alert-info">
+                <span class="alert-icon">📱</span>
+                <span style="font-size: 12px">
+                  The QR code links to the public verification page with this
+                  certificate's ID pre-filled. Students can share it for instant
+                  verification.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <!-- QR Code generator -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for PDF screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  SIGNATURE PAD (DRAW)
+      // ─────────────────────────────────────────
+      let canvas,
+        ctx,
+        isDrawing = false;
+      let penColor = "#1a3a5c",
+        penSize = 2;
+      let lastX = 0,
+        lastY = 0;
+
+      function initCanvas() {
+        canvas = document.getElementById("sigCanvas");
+        ctx = canvas.getContext("2d");
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = penSize;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+
+        canvas.addEventListener("mousedown", startDraw);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDraw);
+        canvas.addEventListener("mouseleave", stopDraw);
+
+        canvas.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            const r = canvas.getBoundingClientRect();
+            startDraw({
+              offsetX: t.clientX - r.left,
+              offsetY: t.clientY - r.top,
+            });
+          },
+          { passive: false },
+        );
+
+        canvas.addEventListener(
+          "touchmove",
+          (e) => {
+            e.preventDefault();
+            const t = e.touches[0];
+            const r = canvas.getBoundingClientRect();
+            draw({ offsetX: t.clientX - r.left, offsetY: t.clientY - r.top });
+          },
+          { passive: false },
+        );
+
+        canvas.addEventListener("touchend", stopDraw);
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        const scaleX = canvas.width / canvas.offsetWidth;
+        const scaleY = canvas.height / canvas.offsetHeight;
+        ctx.beginPath();
+        ctx.moveTo(lastX * scaleX, lastY * scaleY);
+        ctx.lineTo(e.offsetX * scaleX, e.offsetY * scaleY);
+        ctx.stroke();
+        [lastX, lastY] = [e.offsetX, e.offsetY];
+      }
+
+      function stopDraw() {
+        isDrawing = false;
+      }
+
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+
+      function updatePen() {
+        penColor = document.getElementById("penColor").value;
+        penSize = document.getElementById("penSize").value;
+        ctx.strokeStyle = penColor;
+        ctx.lineWidth = penSize;
+      }
+
+      function applyDrawSignature() {
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const blank = data.data.every((v) => v === 0);
+        if (blank) {
+          alert("Please draw your signature first.");
+          return;
+        }
+        const dataUrl = canvas.toDataURL("image/png");
+        applySignatureToDoc(dataUrl, "image");
+      }
+
+      // ─────────────────────────────────────────
+      //  UPLOAD SIGNATURE
+      // ─────────────────────────────────────────
+      let uploadedSigDataUrl = null;
+
+      function uploadSignature(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          uploadedSigDataUrl = e.target.result;
+          document.getElementById("uploadSigImg").src = uploadedSigDataUrl;
+          document.getElementById("uploadSigPreview").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function applyUploadSignature() {
+        if (!uploadedSigDataUrl) {
+          alert("Please upload a signature image first.");
+          return;
+        }
+        applySignatureToDoc(uploadedSigDataUrl, "image");
+      }
+
+      // ─────────────────────────────────────────
+      //  TYPE SIGNATURE
+      // ─────────────────────────────────────────
+      function updateTypedPreview() {
+        const text =
+          document.getElementById("typedSig").value || "Your Signature";
+        const font = document.querySelector(
+          'input[name="sigFont"]:checked',
+        ).value;
+        const el = document.getElementById("typedSigText");
+        el.textContent = text;
+        el.style.fontFamily = `'${font}', cursive`;
+      }
+
+      function applyTypedSignature() {
+        const text = document.getElementById("typedSig").value.trim();
+        if (!text) {
+          alert("Please type your name first.");
+          return;
+        }
+        const font = document.querySelector(
+          'input[name="sigFont"]:checked',
+        ).value;
+        applySignatureToDoc(text, "text", font);
+      }
+
+      // ─────────────────────────────────────────
+      //  APPLY SIGNATURE TO CERTIFICATE
+      // ─────────────────────────────────────────
+      let currentSignature = null;
+
+      function applySignatureToDoc(value, type, font) {
+        currentSignature = { value, type, font: font || "" };
+        localStorage.setItem("certSignature", JSON.stringify(currentSignature));
+
+        const display = document.getElementById("signatureDisplay");
+        if (type === "image") {
+          display.innerHTML = `<img src="${value}"
+            style="max-height:55px;max-width:180px;object-fit:contain"
+            alt="Signature"/>`;
+        } else {
+          display.innerHTML = `<span style="font-family:'${font}',cursive;
+                     font-size:28px;color:#1a3a5c">${value}</span>`;
+        }
+        ContractManager._showToast("Signature applied!", "success");
+      }
+
+      // ─────────────────────────────────────────
+      //  SWITCH TAB
+      // ─────────────────────────────────────────
+      function switchTab(tab) {
+        ["draw", "upload", "type"].forEach((t) => {
+          document.getElementById(`panel-${t}`).style.display = "none";
+          const tabEl = document.getElementById(`tab-${t}`);
+          tabEl.style.background = "transparent";
+          tabEl.style.color = "var(--text-muted)";
+          tabEl.style.borderBottom = "2px solid transparent";
+        });
+        document.getElementById(`panel-${tab}`).style.display = "block";
+        const activeTab = document.getElementById(`tab-${tab}`);
+        activeTab.style.background = "var(--primary-pale)";
+        activeTab.style.color = "var(--primary)";
+        activeTab.style.borderBottom = "2px solid var(--primary)";
+      }
+
+      // ─────────────────────────────────────────
+      //  GENERATE QR CODE
+      // ─────────────────────────────────────────
+      function generateQR(certId) {
+        const container = document.getElementById("qrCodeContainer");
+        container.innerHTML = "";
+        const verifyUrl = `${window.location.origin}/public-verify.html?id=${encodeURIComponent(certId)}`;
+        try {
+          new QRCode(container, {
+            text: verifyUrl,
+            width: 76,
+            height: 76,
+            colorDark: "#1a3a5c",
+            colorLight: "#fffdf5",
+            correctLevel: QRCode.CorrectLevel.M,
+          });
+          setTimeout(() => {
+            const qrCanvas = container.querySelector("canvas");
+            if (qrCanvas) {
+              qrCanvas.style.width = "76px";
+              qrCanvas.style.height = "76px";
+            }
+          }, 200);
+        } catch (e) {
+          container.innerHTML = `<div style="font-size:8px;color:#8a6a20;
+                    text-align:center;padding:4px">${certId}</div>`;
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  POPULATE CERTIFICATE
+      // ─────────────────────────────────────────
+      let currentCertData = null;
+
+      function populateCertificate(cert) {
+        currentCertData = cert;
+
+        document.getElementById("cert-student-name").textContent =
+          cert.studentName || "—";
+        document.getElementById("cert-degree").textContent = cert.degree || "—";
+        document.getElementById("cert-year").textContent = cert.year || "—";
+        document.getElementById("cert-id").textContent = cert.certId || "—";
+        document.getElementById("cert-issue-date").textContent =
+          cert.issueDate || new Date().toLocaleDateString();
+        document.getElementById("cert-institution-header").textContent =
+          cert.institution || "—";
+        document.getElementById("cert-institution-sig").textContent =
+          cert.institution || "—";
+        document.getElementById("info-name").textContent =
+          cert.studentName || "—";
+        document.getElementById("info-degree").textContent = cert.degree || "—";
+        document.getElementById("info-id").textContent = cert.certId || "—";
+        document.getElementById("info-institution").textContent =
+          cert.institution || "—";
+        document.getElementById("info-year").textContent = cert.year || "—";
+
+        const savedLogo = localStorage.getItem("institutionLogo");
+        if (savedLogo) {
+          document.getElementById("certLogo").innerHTML =
+            `<img src="${savedLogo}"
+            style="width:100%;height:100%;object-fit:contain"
+            alt="Logo"/>`;
+        }
+
+        if (cert.certId) {
+          setTimeout(() => generateQR(cert.certId), 600);
+        }
+
+        const savedSig = localStorage.getItem("certSignature");
+        if (savedSig) {
+          try {
+            const sig = JSON.parse(savedSig);
+            currentSignature = sig;
+            applySignatureToDoc(sig.value, sig.type, sig.font);
+          } catch (e) {}
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  DOWNLOAD PDF — Pure jsPDF (no html2canvas)
+      // ─────────────────────────────────────────
+      async function downloadPDF() {
+        if (!currentCertData) {
+          alert("No certificate data loaded.");
+          return;
+        }
+
+        const btn = document.getElementById("downloadBtn");
+        btn.classList.add("btn-loading");
+        btn.textContent = "";
+
+        try {
+          await new Promise((r) => setTimeout(r, 200));
+
+          const { jsPDF } = window.jspdf;
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: "a4",
+          });
+
+          const W = pdf.internal.pageSize.getWidth(); // 297mm
+          const H = pdf.internal.pageSize.getHeight(); // 210mm
+
+          // ── BACKGROUND ──
+          pdf.setFillColor(255, 253, 245); // ivory
+          pdf.rect(0, 0, W, H, "F");
+
+          // ── OUTER GOLD BORDER ──
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(1.5);
+          pdf.rect(8, 8, W - 16, H - 16);
+
+          // ── INNER THIN BORDER ──
+          pdf.setLineWidth(0.4);
+          pdf.rect(11, 11, W - 22, H - 22);
+
+          // ── CORNER DECORATIONS (L-shapes) ──
+          pdf.setLineWidth(1.2);
+          const cs = 12; // corner size mm
+          // Top-left
+          pdf.line(8, 8, 8 + cs, 8);
+          pdf.line(8, 8, 8, 8 + cs);
+          // Top-right
+          pdf.line(W - 8, 8, W - 8 - cs, 8);
+          pdf.line(W - 8, 8, W - 8, 8 + cs);
+          // Bottom-left
+          pdf.line(8, H - 8, 8 + cs, H - 8);
+          pdf.line(8, H - 8, 8, H - 8 - cs);
+          // Bottom-right
+          pdf.line(W - 8, H - 8, W - 8 - cs, H - 8);
+          pdf.line(W - 8, H - 8, W - 8, H - 8 - cs);
+
+          // ── INSTITUTION LOGO (if available) ──
+          const savedLogo = localStorage.getItem("institutionLogo");
+          if (savedLogo && savedLogo.startsWith("data:image")) {
+            try {
+              const ext = savedLogo.includes("image/png") ? "PNG" : "JPEG";
+              pdf.addImage(savedLogo, ext, 18, 18, 22, 22);
+            } catch (e) {
+              // Logo failed — draw placeholder circle
+              pdf.setFillColor(240, 228, 196);
+              pdf.circle(29, 29, 11, "F");
+            }
+          } else {
+            pdf.setFillColor(240, 228, 196);
+            pdf.circle(29, 29, 11, "F");
+          }
+
+          // ── SEAL (right side) ──
+          pdf.setFillColor(253, 246, 227);
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.8);
+          pdf.circle(W - 29, 29, 11, "FD");
+          pdf.setFontSize(7);
+          pdf.setTextColor(138, 106, 32);
+          pdf.setFont("helvetica", "bold");
+          pdf.text("OFFICIAL", W - 29, 31, { align: "center" });
+
+          // ── INSTITUTION NAME (header center) ──
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text(
+            (currentCertData.institution || "Institution").toUpperCase(),
+            W / 2,
+            22,
+            { align: "center" },
+          );
+
+          // ── CERTIFICATE OF ACHIEVEMENT ──
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("CERTIFICATE OF ACHIEVEMENT", W / 2, 30, {
+            align: "center",
+          });
+
+          // ── GOLD DIVIDER LINE ──
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.6);
+          pdf.line(30, 38, W - 30, 38);
+
+          // ── "This is to certify that" ──
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(90, 74, 32);
+          pdf.text("This is to certify that", W / 2, 52, { align: "center" });
+
+          // ── STUDENT NAME (large) ──
+          pdf.setFontSize(28);
+          pdf.setFont("times", "bold");
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(currentCertData.studentName || "Student Name", W / 2, 68, {
+            align: "center",
+          });
+
+          // Underline under name
+          const nameWidth = pdf.getTextWidth(
+            currentCertData.studentName || "Student Name",
+          );
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.5);
+          pdf.line(W / 2 - nameWidth / 2, 70, W / 2 + nameWidth / 2, 70);
+
+          // ── "has successfully completed..." ──
+          pdf.setFontSize(10);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(90, 74, 32);
+          pdf.text(
+            "has successfully completed the requirements for the degree of",
+            W / 2,
+            80,
+            { align: "center" },
+          );
+
+          // ── DEGREE (italic) ──
+          pdf.setFontSize(16);
+          pdf.setFont("times", "bolditalic");
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(currentCertData.degree || "Degree Programme", W / 2, 92, {
+            align: "center",
+          });
+
+          // ── GOLD DIVIDER ──
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.4);
+          pdf.line(30, 100, W - 30, 100);
+
+          // ── YEAR / DATE / CERT ID row ──
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(138, 106, 32);
+
+          // Year column
+          pdf.text("YEAR", 70, 108, { align: "center" });
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(11);
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(String(currentCertData.year || ""), 70, 115, {
+            align: "center",
+          });
+
+          // Separator lines
+          pdf.setDrawColor(232, 213, 160);
+          pdf.setLineWidth(0.3);
+          pdf.line(W / 2 - 40, 104, W / 2 - 40, 120);
+          pdf.line(W / 2 + 40, 104, W / 2 + 40, 120);
+
+          // Issue Date column
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("ISSUE DATE", W / 2, 108, { align: "center" });
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(9);
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(
+            currentCertData.issueDate || new Date().toLocaleDateString(),
+            W / 2,
+            115,
+            { align: "center" },
+          );
+
+          // Cert ID column
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("CERTIFICATE ID", W - 70, 108, { align: "center" });
+          pdf.setFont("courier", "normal");
+          pdf.setFontSize(8);
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(currentCertData.certId || "", W - 70, 115, {
+            align: "center",
+          });
+
+          // ── BOTTOM GOLD DIVIDER ──
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.4);
+          pdf.line(30, 124, W - 30, 124);
+
+          // ── SIGNATURE AREA ──
+          // Signature line
+          pdf.setDrawColor(201, 153, 58);
+          pdf.setLineWidth(0.5);
+          pdf.line(25, 148, 95, 148);
+
+          // Add actual signature if available
+          if (currentSignature) {
+            if (currentSignature.type === "image") {
+              try {
+                const sigExt = currentSignature.value.includes("image/png")
+                  ? "PNG"
+                  : "JPEG";
+                pdf.addImage(currentSignature.value, sigExt, 25, 133, 70, 14);
+              } catch (e) {
+                // Signature image failed silently
+              }
+            } else if (currentSignature.type === "text") {
+              // Typed cursive signature — use italic serif
+              pdf.setFontSize(18);
+              pdf.setFont("times", "bolditalic");
+              pdf.setTextColor(26, 58, 92);
+              pdf.text(currentSignature.value, 60, 147, { align: "center" });
+            }
+          }
+
+          pdf.setFontSize(8);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("Authorized Signatory", 60, 153, { align: "center" });
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(26, 58, 92);
+          pdf.text(currentCertData.institution || "", 60, 158, {
+            align: "center",
+          });
+
+          // ── BLOCKCHAIN BADGE (center bottom) ──
+          pdf.setFontSize(7);
+          pdf.setFont("helvetica", "bold");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("VERIFIED ON", W / 2, 145, { align: "center" });
+          pdf.setTextColor(26, 58, 92);
+          pdf.text("BLOCKCHAIN", W / 2, 150, { align: "center" });
+          pdf.setFont("courier", "normal");
+          pdf.setFontSize(6);
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("Sepolia Testnet", W / 2, 155, { align: "center" });
+
+          // ── QR CODE (right bottom) ──
+          const qrCanvas = document.querySelector("#qrCodeContainer canvas");
+          if (qrCanvas && qrCanvas.width > 0 && qrCanvas.height > 0) {
+            try {
+              const qrData = qrCanvas.toDataURL("image/png");
+              pdf.addImage(qrData, "PNG", W - 50, 132, 28, 28);
+            } catch (e) {
+              // QR failed silently
+            }
+          }
+
+          pdf.setFontSize(7);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(138, 106, 32);
+          pdf.text("Scan to Verify", W - 36, 163, { align: "center" });
+
+          // ── FOOTER ──
+          pdf.setFontSize(6.5);
+          pdf.setFont("helvetica", "normal");
+          pdf.setTextColor(160, 140, 100);
+          pdf.text(
+            "This certificate is digitally verified on the Ethereum Sepolia blockchain. " +
+              "Verify at: certchain/public-verify.html",
+            W / 2,
+            H - 12,
+            { align: "center" },
+          );
+
+          // ── SAVE ──
+          const name = (currentCertData.studentName || "student").replace(
+            /\s+/g,
+            "-",
+          );
+          const id = currentCertData.certId || "cert";
+          pdf.save(`CertChain-${name}-${id}.pdf`);
+
+          // Log
+          AuditLog.add("issuer", "downloaded", {
+            certId: currentCertData.certId,
+            studentName: currentCertData.studentName,
+          });
+
+          btn.classList.remove("btn-loading");
+          btn.textContent = "📥 Download PDF Certificate";
+          ContractManager._showToast("PDF downloaded successfully!", "success");
+        } catch (err) {
+          btn.classList.remove("btn-loading");
+          btn.textContent = "📥 Download PDF Certificate";
+          console.error("PDF error:", err);
+          alert("PDF failed: " + err.message);
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", () => {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+
+        const account = WalletManager.restoreSession();
+        if (account) {
+          document.getElementById("walletAddr").textContent =
+            WalletManager.formatAddress(account);
+        }
+
+        let certData = null;
+        try {
+          certData = JSON.parse(localStorage.getItem("lastIssuedCert"));
+        } catch (e) {}
+
+        if (!certData) {
+          document.querySelector(".main-content").innerHTML = `
+      <div class="container" style="padding:60px 0;text-align:center">
+        <div style="font-size:3rem;margin-bottom:16px">⚠️</div>
+        <h3>No Certificate Data Found</h3>
+        <p style="margin:12px 0 24px">
+          Please issue a certificate first,
+          then click "Generate PDF Certificate".
+        </p>
+        <a href="issue-certificate.html" class="btn btn-primary">
+          📜 Issue Certificate
+        </a>
+      </div>`;
+          return;
+        }
+
+        populateCertificate(certData);
+        initCanvas();
+      });
+    </script>
+  </body>
+</html>

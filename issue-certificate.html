@@ -1,0 +1,969 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issue Certificate — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge issuer">Issuer</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="issuer-dashboard.html" class="btn btn-ghost btn-sm">
+              ← Dashboard
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container-md">
+          <!-- Page Header -->
+          <div class="section-header" style="margin-bottom: 32px">
+            <div style="font-size: 2.5rem; margin-bottom: 12px">📜</div>
+            <h2>Issue New Certificate</h2>
+            <p>
+              Fill in the student's details below. Once submitted, the
+              certificate will be permanently stored on the blockchain.
+            </p>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 380px;
+              gap: 24px;
+              align-items: start;
+            "
+            id="mainGrid"
+          >
+            <!-- ─── LEFT: FORM ─── -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">✏️</div>
+                  Certificate Details
+                </div>
+                <!-- Institution name badge -->
+                <span
+                  style="font-size: 12px; color: var(--text-muted)"
+                  id="institutionBadge"
+                  >—</span
+                >
+              </div>
+
+              <!-- Certificate ID -->
+              <div class="form-group">
+                <label class="form-label">
+                  Certificate ID <span class="required">*</span>
+                </label>
+                <div style="display: flex; gap: 10px">
+                  <input
+                    type="text"
+                    id="certId"
+                    class="form-control"
+                    placeholder="e.g. GTU-2024-CS-001"
+                    style="font-family: var(--font-mono)"
+                    oninput="
+                      clearFieldError('certId');
+                      checkIdExists();
+                    "
+                  />
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    onclick="generateCertId()"
+                    style="white-space: nowrap; flex-shrink: 0"
+                  >
+                    ⚡ Auto Generate
+                  </button>
+                </div>
+                <div class="form-hint" id="certIdHint">
+                  Must be unique across the entire blockchain
+                </div>
+                <div class="form-error" id="certIdError">
+                  Certificate ID is required
+                </div>
+                <!-- ID check result -->
+                <div id="idCheckResult" style="margin-top: 6px"></div>
+              </div>
+
+              <!-- Student Name -->
+              <div class="form-group">
+                <label class="form-label">
+                  Student Full Name <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="studentName"
+                  class="form-control"
+                  placeholder="e.g. Rahul Sharma"
+                  oninput="
+                    clearFieldError('studentName');
+                    updatePreview();
+                  "
+                />
+                <div class="form-error" id="studentNameError">
+                  Student name is required
+                </div>
+              </div>
+
+              <!-- Degree -->
+              <div class="form-group">
+                <label class="form-label">
+                  Degree / Programme <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="degree"
+                  class="form-control"
+                  placeholder="e.g. B.Tech Computer Science"
+                  oninput="
+                    clearFieldError('degree');
+                    updatePreview();
+                  "
+                />
+                <div class="form-error" id="degreeError">
+                  Degree is required
+                </div>
+              </div>
+
+              <!-- Institution Name -->
+              <div class="form-group">
+                <label class="form-label">
+                  Institution Name <span class="required">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="institution"
+                  class="form-control"
+                  placeholder="e.g. Gujarat Technological University"
+                  oninput="
+                    clearFieldError('institution');
+                    updatePreview();
+                  "
+                />
+                <div class="form-hint">
+                  Auto-filled from your profile if available
+                </div>
+                <div class="form-error" id="institutionError">
+                  Institution name is required
+                </div>
+              </div>
+
+              <!-- Year + Expiry Row -->
+              <div class="form-row">
+                <!-- Graduation Year -->
+                <div class="form-group">
+                  <label class="form-label">
+                    Graduation Year <span class="required">*</span>
+                  </label>
+                  <select
+                    id="gradYear"
+                    class="form-control"
+                    onchange="
+                      clearFieldError('gradYear');
+                      updatePreview();
+                    "
+                  >
+                    <option value="">Select year</option>
+                  </select>
+                  <div class="form-error" id="gradYearError">
+                    Year is required
+                  </div>
+                </div>
+
+                <!-- Expiry Date (optional) -->
+                <div class="form-group">
+                  <label class="form-label">
+                    Expiry Date
+                    <span style="font-weight: 400; color: var(--text-muted)">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    type="date"
+                    id="expiryDate"
+                    class="form-control"
+                    oninput="updatePreview()"
+                  />
+                  <div class="form-hint">Leave blank for no expiry</div>
+                </div>
+              </div>
+
+              <!-- Additional Notes (stored locally only) -->
+              <div class="form-group">
+                <label class="form-label">
+                  Additional Notes
+                  <span style="font-weight: 400; color: var(--text-muted)">
+                    (local only, not on blockchain)
+                  </span>
+                </label>
+                <textarea
+                  id="notes"
+                  class="form-control"
+                  rows="3"
+                  placeholder="e.g. Gold medalist, First class with distinction..."
+                ></textarea>
+              </div>
+
+              <!-- Submit Button -->
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  margin-top: 8px;
+                  flex-wrap: wrap;
+                "
+              >
+                <button
+                  class="btn btn-primary btn-lg"
+                  id="issueBtn"
+                  onclick="issueCertificate()"
+                >
+                  🚀 Issue Certificate on Blockchain
+                </button>
+                <button class="btn btn-ghost" onclick="resetForm()">
+                  🔄 Reset
+                </button>
+              </div>
+
+              <!-- Gas warning -->
+              <div class="alert alert-warning" style="margin-top: 20px">
+                <span class="alert-icon">⛽</span>
+                <span>
+                  Issuing a certificate requires a gas fee in Sepolia ETH.
+                  MetaMask will ask for confirmation.
+                </span>
+              </div>
+            </div>
+
+            <!-- ─── RIGHT: LIVE PREVIEW ─── -->
+            <div style="position: sticky; top: 88px">
+              <!-- Mini certificate preview -->
+              <div
+                class="card"
+                style="padding: 0; overflow: hidden; margin-bottom: 20px"
+              >
+                <div
+                  style="
+                    background: linear-gradient(
+                      135deg,
+                      var(--primary),
+                      var(--primary-light)
+                    );
+                    padding: 14px 18px;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      font-weight: 600;
+                      color: rgba(255, 255, 255, 0.8);
+                      text-transform: uppercase;
+                      letter-spacing: 0.5px;
+                    "
+                  >
+                    Live Preview
+                  </div>
+                </div>
+
+                <div style="padding: 20px">
+                  <!-- Mini cert card -->
+                  <div
+                    style="
+                      border: 2px solid var(--accent);
+                      border-radius: var(--radius-md);
+                      padding: 16px;
+                      background: var(--accent-pale);
+                      text-align: center;
+                    "
+                  >
+                    <div style="font-size: 1.5rem; margin-bottom: 8px">🎓</div>
+                    <div
+                      style="
+                        font-size: 10px;
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        color: var(--accent);
+                        margin-bottom: 8px;
+                        font-weight: 600;
+                      "
+                    >
+                      Certificate of Achievement
+                    </div>
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: var(--text-primary);
+                        margin-bottom: 4px;
+                      "
+                      id="prev-name"
+                    >
+                      Student Name
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        margin-bottom: 8px;
+                      "
+                      id="prev-degree"
+                    >
+                      Degree Programme
+                    </div>
+                    <div
+                      style="
+                        height: 1px;
+                        background: var(--accent-light);
+                        margin: 10px 0;
+                      "
+                    ></div>
+                    <div
+                      style="font-size: 10px; color: var(--text-secondary)"
+                      id="prev-institution"
+                    >
+                      Institution
+                    </div>
+                    <div
+                      style="font-size: 10px; color: var(--text-muted)"
+                      id="prev-year"
+                    >
+                      Year
+                    </div>
+                    <div
+                      style="
+                        font-size: 9px;
+                        color: var(--text-muted);
+                        margin-top: 8px;
+                        font-family: var(--font-mono);
+                      "
+                      id="prev-id"
+                    >
+                      CERT-ID
+                    </div>
+                  </div>
+
+                  <!-- Status indicators -->
+                  <div
+                    style="
+                      margin-top: 16px;
+                      display: flex;
+                      flex-direction: column;
+                      gap: 8px;
+                    "
+                  >
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                      "
+                    >
+                      <span style="color: var(--text-muted)">Status</span>
+                      <span class="badge badge-valid" style="font-size: 10px">
+                        Will be Valid
+                      </span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                      "
+                    >
+                      <span style="color: var(--text-muted)">Storage</span>
+                      <span style="color: var(--success); font-weight: 600">
+                        🔗 On Blockchain
+                      </span>
+                    </div>
+                    <div
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 12px;
+                      "
+                      id="expiryRow"
+                    >
+                      <span style="color: var(--text-muted)">Expiry</span>
+                      <span
+                        style="color: var(--text-secondary)"
+                        id="prev-expiry"
+                        >No Expiry</span
+                      >
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Checklist card -->
+              <div class="card-flat" style="background: var(--bg-secondary)">
+                <div
+                  style="
+                    font-size: 13px;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                    margin-bottom: 12px;
+                  "
+                >
+                  ✅ Before Issuing
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 8px">
+                  <div
+                    class="check-item"
+                    id="check-id"
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      gap: 6px;
+                    "
+                  >
+                    ⬜ Certificate ID is unique
+                  </div>
+                  <div
+                    class="check-item"
+                    id="check-name"
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      gap: 6px;
+                    "
+                  >
+                    ⬜ Student name is correct
+                  </div>
+                  <div
+                    class="check-item"
+                    id="check-degree"
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      gap: 6px;
+                    "
+                  >
+                    ⬜ Degree is filled
+                  </div>
+                  <div
+                    class="check-item"
+                    id="check-institution"
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      gap: 6px;
+                    "
+                  >
+                    ⬜ Institution name filled
+                  </div>
+                  <div
+                    class="check-item"
+                    id="check-year"
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      gap: 6px;
+                    "
+                  >
+                    ⬜ Graduation year selected
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── SUCCESS PANEL (hidden until issued) ─── -->
+          <div id="successPanel" class="hidden" style="margin-top: 28px">
+            <div class="result-card valid">
+              <div class="result-header">
+                <div class="result-icon">🎉</div>
+                <div>
+                  <div class="result-title" style="color: var(--success)">
+                    Certificate Issued Successfully!
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      margin-top: 4px;
+                    "
+                  >
+                    Permanently stored on the Sepolia blockchain
+                  </div>
+                </div>
+              </div>
+
+              <div class="cert-detail-grid">
+                <div class="cert-detail-item">
+                  <div class="cert-detail-label">Certificate ID</div>
+                  <div class="cert-detail-value font-mono" id="success-certId">
+                    —
+                  </div>
+                </div>
+                <div class="cert-detail-item">
+                  <div class="cert-detail-label">Student Name</div>
+                  <div class="cert-detail-value" id="success-name">—</div>
+                </div>
+                <div class="cert-detail-item">
+                  <div class="cert-detail-label">Degree</div>
+                  <div class="cert-detail-value" id="success-degree">—</div>
+                </div>
+                <div class="cert-detail-item">
+                  <div class="cert-detail-label">Transaction</div>
+                  <div class="cert-detail-value">
+                    <a
+                      id="success-tx"
+                      href="#"
+                      target="_blank"
+                      style="font-size: 12px; font-family: var(--font-mono)"
+                    >
+                      View on Etherscan ↗
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  margin-top: 20px;
+                  flex-wrap: wrap;
+                "
+              >
+                <button
+                  class="btn btn-accent"
+                  id="generatePdfBtn"
+                  onclick="goToPreview()"
+                >
+                  📄 Generate PDF Certificate
+                </button>
+                <button class="btn btn-primary" onclick="issueAnother()">
+                  ➕ Issue Another
+                </button>
+                <a href="issuer-dashboard.html" class="btn btn-ghost">
+                  📊 View Dashboard
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  POPULATE YEAR DROPDOWN
+      // ─────────────────────────────────────────
+      function populateYears() {
+        const select = document.getElementById("gradYear");
+        const current = new Date().getFullYear();
+        for (let y = current; y >= 1980; y--) {
+          const opt = document.createElement("option");
+          opt.value = y;
+          opt.textContent = y;
+          select.appendChild(opt);
+        }
+        // Default to current year
+        select.value = current;
+      }
+
+      // ─────────────────────────────────────────
+      //  AUTO GENERATE CERTIFICATE ID
+      // ─────────────────────────────────────────
+      function generateCertId() {
+        const institution = document.getElementById("institution").value.trim();
+        const year =
+          document.getElementById("gradYear").value || new Date().getFullYear();
+
+        // Get institution abbreviation
+        let abbr = "CERT";
+        if (institution) {
+          abbr =
+            institution
+              .split(" ")
+              .filter((w) => w.length > 2)
+              .map((w) => w[0].toUpperCase())
+              .join("")
+              .slice(0, 4) || "CERT";
+        }
+
+        // Random 4-digit suffix
+        const rand = Math.floor(1000 + Math.random() * 9000);
+        const id = `${abbr}-${year}-${rand}`;
+
+        document.getElementById("certId").value = id;
+        updatePreview();
+        checkIdExists();
+      }
+
+      // ─────────────────────────────────────────
+      //  CHECK IF CERT ID ALREADY EXISTS
+      // ─────────────────────────────────────────
+      let checkTimeout = null;
+
+      async function checkIdExists() {
+        const certId = document.getElementById("certId").value.trim();
+        const resultEl = document.getElementById("idCheckResult");
+
+        if (!certId || certId.length < 3) {
+          resultEl.innerHTML = "";
+          return;
+        }
+
+        // Debounce — wait 600ms after typing stops
+        clearTimeout(checkTimeout);
+        checkTimeout = setTimeout(async () => {
+          resultEl.innerHTML = `<span style="font-size:12px;color:var(--text-muted)">
+         ⏳ Checking availability...
+       </span>`;
+
+          try {
+            const result = await ContractManager.certIdExists(certId);
+            if (result.success) {
+              if (result.exists) {
+                resultEl.innerHTML = `<span style="font-size:12px;color:var(--danger)">
+               ❌ This ID already exists on the blockchain
+             </span>`;
+                updateCheckItem("check-id", false);
+              } else {
+                resultEl.innerHTML = `<span style="font-size:12px;color:var(--success)">
+               ✅ ID is available
+             </span>`;
+                updateCheckItem("check-id", true);
+              }
+            }
+          } catch (e) {
+            resultEl.innerHTML = "";
+          }
+        }, 600);
+      }
+
+      // ─────────────────────────────────────────
+      //  LIVE PREVIEW UPDATER
+      // ─────────────────────────────────────────
+      function updatePreview() {
+        const name =
+          document.getElementById("studentName").value || "Student Name";
+        const degree =
+          document.getElementById("degree").value || "Degree Programme";
+        const institution =
+          document.getElementById("institution").value || "Institution";
+        const year = document.getElementById("gradYear").value || "Year";
+        const certId = document.getElementById("certId").value || "CERT-ID";
+        const expiry = document.getElementById("expiryDate").value;
+
+        document.getElementById("prev-name").textContent = name;
+        document.getElementById("prev-degree").textContent = degree;
+        document.getElementById("prev-institution").textContent = institution;
+        document.getElementById("prev-year").textContent = year;
+        document.getElementById("prev-id").textContent = certId;
+        document.getElementById("prev-expiry").textContent = expiry
+          ? new Date(expiry).toLocaleDateString()
+          : "No Expiry";
+
+        // Update checklist
+        updateCheckItem("check-name", name !== "Student Name");
+        updateCheckItem("check-degree", degree !== "Degree Programme");
+        updateCheckItem("check-institution", institution !== "Institution");
+        updateCheckItem("check-year", year !== "Year");
+      }
+
+      function updateCheckItem(id, isDone) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const text = el.textContent.replace("✅ ", "").replace("⬜ ", "");
+        el.textContent = (isDone ? "✅ " : "⬜ ") + text;
+        el.style.color = isDone ? "var(--success)" : "var(--text-muted)";
+      }
+
+      // ─────────────────────────────────────────
+      //  FORM VALIDATION
+      // ─────────────────────────────────────────
+      function validateForm() {
+        let isValid = true;
+
+        const fields = [
+          {
+            id: "certId",
+            errorId: "certIdError",
+            msg: "Certificate ID is required",
+          },
+          {
+            id: "studentName",
+            errorId: "studentNameError",
+            msg: "Student name is required",
+          },
+          { id: "degree", errorId: "degreeError", msg: "Degree is required" },
+          {
+            id: "institution",
+            errorId: "institutionError",
+            msg: "Institution name is required",
+          },
+          {
+            id: "gradYear",
+            errorId: "gradYearError",
+            msg: "Graduation year is required",
+          },
+        ];
+
+        fields.forEach((f) => {
+          const el = document.getElementById(f.id);
+          const err = document.getElementById(f.errorId);
+          if (!el.value.trim()) {
+            el.classList.add("error");
+            if (err) {
+              err.textContent = f.msg;
+              err.style.display = "block";
+            }
+            isValid = false;
+          }
+        });
+
+        return isValid;
+      }
+
+      function clearFieldError(fieldId) {
+        const el = document.getElementById(fieldId);
+        const err = document.getElementById(fieldId + "Error");
+        if (el) el.classList.remove("error");
+        if (err) err.style.display = "none";
+      }
+
+      // ─────────────────────────────────────────
+      //  ISSUE CERTIFICATE
+      // ─────────────────────────────────────────
+      // Store last issued cert data for PDF generation
+      let lastIssuedCert = null;
+
+      async function issueCertificate() {
+        if (!validateForm()) return;
+
+        const certId = document.getElementById("certId").value.trim();
+        const studentName = document.getElementById("studentName").value.trim();
+        const degree = document.getElementById("degree").value.trim();
+        const institution = document.getElementById("institution").value.trim();
+        const year = document.getElementById("gradYear").value;
+        const expiryDate = document.getElementById("expiryDate").value;
+        const notes = document.getElementById("notes").value.trim();
+
+        // Disable button
+        const btn = document.getElementById("issueBtn");
+        btn.classList.add("btn-loading");
+        btn.textContent = "";
+        btn.disabled = true;
+
+        // Call blockchain
+        const result = await ContractManager.issueCertificate(
+          certId,
+          studentName,
+          degree,
+          institution,
+          year,
+          expiryDate,
+        );
+
+        btn.classList.remove("btn-loading");
+        btn.textContent = "🚀 Issue Certificate on Blockchain";
+        btn.disabled = false;
+
+        if (result.success) {
+          // Save cert data for PDF generation
+          lastIssuedCert = {
+            certId,
+            studentName,
+            degree,
+            institution,
+            year,
+            expiryDate,
+            notes,
+            issueDate: new Date().toLocaleDateString(),
+            txHash: result.txHash,
+          };
+
+          // Save to localStorage for certificate-preview page
+          localStorage.setItem(
+            "lastIssuedCert",
+            JSON.stringify(lastIssuedCert),
+          );
+
+          // Show success panel
+          showSuccessPanel(lastIssuedCert);
+
+          // Scroll to success
+          document
+            .getElementById("successPanel")
+            .scrollIntoView({ behavior: "smooth" });
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  SHOW SUCCESS PANEL
+      // ─────────────────────────────────────────
+      function showSuccessPanel(cert) {
+        const panel = document.getElementById("successPanel");
+        panel.classList.remove("hidden");
+        panel.style.display = "block";
+
+        document.getElementById("success-certId").textContent = cert.certId;
+        document.getElementById("success-name").textContent = cert.studentName;
+        document.getElementById("success-degree").textContent = cert.degree;
+
+        // Etherscan link
+        const txLink = document.getElementById("success-tx");
+        if (cert.txHash) {
+          txLink.href = `https://sepolia.etherscan.io/tx/${cert.txHash}`;
+          txLink.textContent = cert.txHash.slice(0, 20) + "... ↗";
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  NAVIGATE TO CERTIFICATE PREVIEW
+      // ─────────────────────────────────────────
+      function goToPreview() {
+        if (!lastIssuedCert) return;
+        window.location.href = "certificate-preview.html";
+      }
+
+      // ─────────────────────────────────────────
+      //  ISSUE ANOTHER — RESET FORM
+      // ─────────────────────────────────────────
+      function issueAnother() {
+        resetForm();
+        document.getElementById("successPanel").style.display = "none";
+        document.getElementById("successPanel").classList.add("hidden");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function resetForm() {
+        ["certId", "studentName", "degree", "expiryDate", "notes"].forEach(
+          (id) => (document.getElementById(id).value = ""),
+        );
+        populateYears(); // resets year to current
+        updatePreview();
+
+        // Clear check items
+        [
+          "check-id",
+          "check-name",
+          "check-degree",
+          "check-institution",
+          "check-year",
+        ].forEach((id) => updateCheckItem(id, false));
+
+        document.getElementById("idCheckResult").innerHTML = "";
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", async () => {
+        // Require wallet + issuer role
+        const account = WalletManager.requireWallet();
+        if (!account) return;
+        WalletManager.requireRole(["issuer"]);
+
+        // Show wallet
+        document.getElementById("walletAddr").textContent =
+          WalletManager.formatAddress(account);
+
+        // Populate year dropdown
+        populateYears();
+
+        // Auto-fill institution name from localStorage or blockchain
+        const savedName = localStorage.getItem("institutionName");
+        if (savedName) {
+          document.getElementById("institution").value = savedName;
+          document.getElementById("institutionBadge").textContent =
+            "🏛️ " + savedName;
+          updateCheckItem("check-institution", true);
+        } else {
+          // Try blockchain
+          const profile = await ContractManager.getIssuerProfile(account);
+          if (profile.success && profile.isRegistered) {
+            document.getElementById("institution").value =
+              profile.institutionName;
+            document.getElementById("institutionBadge").textContent =
+              "🏛️ " + profile.institutionName;
+            localStorage.setItem("institutionName", profile.institutionName);
+            updateCheckItem("check-institution", true);
+          }
+        }
+
+        // Set min expiry date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById("expiryDate").min = tomorrow
+          .toISOString()
+          .split("T")[0];
+
+        updatePreview();
+      });
+    </script>
+  </body>
+</html>

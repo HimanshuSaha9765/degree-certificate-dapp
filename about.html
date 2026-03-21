@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <a
+              href="public-verify.html"
+              style="
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-secondary);
+              "
+            >
+              Verify
+            </a>
+            <a
+              href="role-select.html"
+              style="
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-secondary);
+              "
+            >
+              Dashboard
+            </a>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="index.html" class="btn btn-primary btn-sm"> 🏠 Home </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       HERO
+  ═══════════════════════════════════════ -->
+      <section
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--primary) 0%,
+            var(--primary-light) 100%
+          );
+          padding: 72px 24px 90px;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <div
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: var(--bg);
+            clip-path: ellipse(55% 100% at 50% 100%);
+          "
+        ></div>
+        <div style="position: relative; z-index: 1">
+          <div style="font-size: 3rem; margin-bottom: 16px">🎓</div>
+          <h1 style="color: white; margin-bottom: 14px">About CertChain</h1>
+          <p
+            style="
+              color: rgba(255, 255, 255, 0.8);
+              font-size: 15px;
+              max-width: 520px;
+              margin: 0 auto;
+            "
+          >
+            A decentralized degree certificate verification system built on
+            Ethereum blockchain with AI fraud detection.
+          </p>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container-md">
+          <!-- ─── WHAT IS CERTCHAIN ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">🔗</div>
+                What is CertChain?
+              </div>
+            </div>
+            <p style="font-size: 15px; line-height: 1.8; margin-bottom: 14px">
+              CertChain is a blockchain-powered academic certificate
+              verification system that allows universities and colleges to issue
+              tamper-proof digital certificates, and enables employers and the
+              public to verify them instantly — without trusting any central
+              authority.
+            </p>
+            <p
+              style="
+                font-size: 14px;
+                color: var(--text-muted);
+                line-height: 1.8;
+              "
+            >
+              Traditional paper certificates can be forged, altered, or
+              backdated. CertChain eliminates this by storing certificates
+              permanently on the Ethereum blockchain — where every record is
+              public, immutable, and cryptographically secured.
+            </p>
+          </div>
+
+          <!-- ─── THE PROBLEM WE SOLVE ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">🎯</div>
+                The Problem We Solve
+              </div>
+            </div>
+            <div class="grid-2" style="gap: 16px">
+              <div
+                style="
+                  padding: 16px;
+                  background: var(--danger-bg);
+                  border-radius: var(--radius-md);
+                  border-left: 4px solid var(--danger);
+                "
+              >
+                <div
+                  style="
+                    font-weight: 700;
+                    color: var(--danger);
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                  "
+                >
+                  ❌ Traditional System Problems
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                  "
+                >
+                  <div>• Paper certificates can be forged easily</div>
+                  <div>• Verification takes days or weeks</div>
+                  <div>• No single source of truth</div>
+                  <div>• Institutions can be bribed or hacked</div>
+                  <div>• No fraud pattern detection</div>
+                  <div>• Students can fake credentials</div>
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 16px;
+                  background: var(--success-bg);
+                  border-radius: var(--radius-md);
+                  border-left: 4px solid var(--success);
+                "
+              >
+                <div
+                  style="
+                    font-weight: 700;
+                    color: var(--success);
+                    margin-bottom: 8px;
+                    font-size: 14px;
+                  "
+                >
+                  ✅ CertChain Solution
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    font-size: 13px;
+                    color: var(--text-secondary);
+                  "
+                >
+                  <div>• Blockchain makes forgery impossible</div>
+                  <div>• Instant verification in seconds</div>
+                  <div>• Ethereum blockchain = single truth</div>
+                  <div>• No central point of failure</div>
+                  <div>• AI detects fraud patterns</div>
+                  <div>• Cryptographic proof of authenticity</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── HOW BLOCKCHAIN ENSURES TRUST ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">🔒</div>
+                How Blockchain Ensures Trust
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div style="display: flex; gap: 14px; align-items: flex-start">
+                <div
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    flex-shrink: 0;
+                    background: var(--primary-pale);
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                  "
+                >
+                  📦
+                </div>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px">
+                    Immutable Storage
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    Once a certificate is written to the blockchain, it cannot
+                    be modified or deleted — not even by the issuing
+                    institution. Every record is permanent by design.
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 14px; align-items: flex-start">
+                <div
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    flex-shrink: 0;
+                    background: var(--primary-pale);
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                  "
+                >
+                  🌐
+                </div>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px">
+                    Decentralized Network
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    Data is stored across thousands of computers worldwide
+                    simultaneously. There is no single server that can be
+                    hacked, shut down, or manipulated.
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 14px; align-items: flex-start">
+                <div
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    flex-shrink: 0;
+                    background: var(--primary-pale);
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                  "
+                >
+                  🔑
+                </div>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px">
+                    Cryptographic Identity
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    Every issuer is identified by their unique MetaMask wallet
+                    address. Only the wallet that issued a certificate can
+                    revoke it — ensuring accountability without passwords.
+                  </div>
+                </div>
+              </div>
+              <div style="display: flex; gap: 14px; align-items: flex-start">
+                <div
+                  style="
+                    width: 40px;
+                    height: 40px;
+                    flex-shrink: 0;
+                    background: var(--primary-pale);
+                    border-radius: var(--radius-md);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                  "
+                >
+                  🔍
+                </div>
+                <div>
+                  <div style="font-weight: 600; margin-bottom: 4px">
+                    Public Transparency
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    All certificate records are publicly readable by anyone — no
+                    login required. This creates complete transparency while
+                    keeping the system trustless and open.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── AI FRAUD DETECTION EXPLAINED ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">🤖</div>
+                AI Fraud Detection — How It Works
+              </div>
+            </div>
+
+            <p
+              style="
+                font-size: 14px;
+                color: var(--text-secondary);
+                margin-bottom: 20px;
+                line-height: 1.7;
+              "
+            >
+              Our AI is not a neural network — it is a powerful
+              <strong>rule-based intelligence engine</strong> that mimics how a
+              trained fraud analyst thinks. It runs 7 checks on every
+              certificate and assigns a Trust Score from 0–100.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <!-- Each AI check -->
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">1️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Existence Check (−100 if fails)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    First confirms the certificate exists on the blockchain. If
+                    not found, score goes to 0 immediately — it is completely
+                    invalid.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">2️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Revocation Check (−80 if revoked)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    Checks if the issuing institution has revoked this
+                    certificate. Revoked certificates are permanently invalid
+                    regardless of other checks.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">3️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Expiry Check (−40 if expired)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    If the issuer set an expiry date and that date has passed,
+                    the certificate is flagged as expired and score is reduced
+                    significantly.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">4️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Multi-Degree Pattern (−20 if suspicious)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    Checks how many certificates exist for the same student
+                    name. If one person has 4 or more different degrees, the
+                    engine flags it as a suspicious pattern.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">5️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Bulk Issuing Detection (−15 if suspicious)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    Checks how many certificates the issuer has issued in total.
+                    If an issuer has issued more than 50 certificates from one
+                    wallet, it raises a flag for further review.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">6️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Data Completeness Check (−10 if incomplete)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    Verifies all required fields are present and non-empty.
+                    Missing student name, degree, or institution name is a red
+                    flag for data tampering or malformed records.
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 12px;
+                  padding: 14px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <span style="font-size: 1.5rem; flex-shrink: 0">7️⃣</span>
+                <div>
+                  <div
+                    style="
+                      font-weight: 600;
+                      font-size: 14px;
+                      margin-bottom: 3px;
+                    "
+                  >
+                    Year Validation (+5 bonus if recent)
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-muted)">
+                    Checks if the graduation year is realistic. Years before
+                    1980 or in the future are flagged. Recently issued
+                    certificates get a small trust bonus.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Score table -->
+            <div
+              style="
+                margin-top: 20px;
+                padding: 16px;
+                background: var(--accent-pale);
+                border: 1px solid var(--accent-light);
+                border-radius: var(--radius-md);
+              "
+            >
+              <div
+                style="
+                  font-weight: 700;
+                  color: var(--accent);
+                  font-size: 13px;
+                  margin-bottom: 12px;
+                "
+              >
+                📊 Trust Score Classification
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 8px">
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-safe"
+                    style="min-width: 110px; justify-content: center"
+                  >
+                    ✅ Safe (80–100)
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Certificate passes all checks. Highly trustworthy.
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-warning"
+                    style="min-width: 110px; justify-content: center"
+                  >
+                    ⚠️ Medium (50–79)
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Some patterns flagged. Verify with institution.
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-risky"
+                    style="min-width: 110px; justify-content: center"
+                  >
+                    🚨 High Risk (0–49)
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Multiple issues detected. Do not trust without direct
+                    verification from institution.
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── TECH STACK ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">⚙️</div>
+                Technology Stack
+              </div>
+            </div>
+            <div class="grid-2" style="gap: 14px">
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">📝</div>
+                <div style="font-weight: 600; margin-bottom: 4px">Solidity</div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Smart contract language for Ethereum. Handles certificate
+                  storage, issuance, revocation and access control.
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">🦊</div>
+                <div style="font-weight: 600; margin-bottom: 4px">
+                  MetaMask + ethers.js
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Wallet connection and blockchain interaction. ethers.js v5.7.2
+                  handles all contract calls from the browser.
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">🌐</div>
+                <div style="font-weight: 600; margin-bottom: 4px">
+                  HTML + CSS + JavaScript
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Pure vanilla frontend — no React or Node.js required. Works
+                  with any basic HTTP server or Live Server extension.
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">🔗</div>
+                <div style="font-weight: 600; margin-bottom: 4px">
+                  Sepolia Testnet
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Ethereum test network used for deployment. Free test ETH
+                  available from faucets. No real money involved.
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">📄</div>
+                <div style="font-weight: 600; margin-bottom: 4px">
+                  jsPDF + html2canvas
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  PDF certificate generation in the browser. html2canvas
+                  captures the visual certificate, jsPDF exports it as a
+                  downloadable file.
+                </div>
+              </div>
+              <div
+                style="
+                  padding: 14px;
+                  border: 1px solid var(--border);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div style="font-size: 1.5rem; margin-bottom: 8px">📱</div>
+                <div style="font-weight: 600; margin-bottom: 4px">
+                  QRCode.js
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted)">
+                  Generates QR codes embedded in PDF certificates. Scanning the
+                  QR auto-opens the public verification page with ID pre-filled.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── USER ROLES SUMMARY ─── -->
+          <div class="card" style="margin-bottom: 28px">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">👥</div>
+                User Roles & Access
+              </div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+              <div
+                style="
+                  display: flex;
+                  gap: 14px;
+                  padding: 16px;
+                  background: var(--primary-pale);
+                  border-radius: var(--radius-md);
+                  border-left: 4px solid var(--primary);
+                "
+              >
+                <div style="font-size: 2rem; flex-shrink: 0">🎓</div>
+                <div>
+                  <div
+                    style="
+                      font-weight: 700;
+                      color: var(--primary);
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Issuer — College / University
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    Sets up institution profile → Issues certificates on
+                    blockchain → Generates PDF with QR code and digital
+                    signature → Revokes if needed → Views full audit log of all
+                    actions
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 14px;
+                  padding: 16px;
+                  background: var(--accent-pale);
+                  border-radius: var(--radius-md);
+                  border-left: 4px solid var(--accent);
+                "
+              >
+                <div style="font-size: 2rem; flex-shrink: 0">🔍</div>
+                <div>
+                  <div
+                    style="
+                      font-weight: 700;
+                      color: var(--accent);
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Verifier — Employer / Organization
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    Searches certificate by ID → Gets full details from
+                    blockchain → Receives complete AI fraud analysis report with
+                    Trust Score → Views detailed check results and risk flags
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style="
+                  display: flex;
+                  gap: 14px;
+                  padding: 16px;
+                  background: var(--success-bg);
+                  border-radius: var(--radius-md);
+                  border-left: 4px solid var(--success);
+                "
+              >
+                <div style="font-size: 2rem; flex-shrink: 0">👤</div>
+                <div>
+                  <div
+                    style="
+                      font-weight: 700;
+                      color: var(--success);
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Public User — Student / Anyone
+                  </div>
+                  <div
+                    style="
+                      font-size: 13px;
+                      color: var(--text-secondary);
+                      line-height: 1.6;
+                    "
+                  >
+                    No wallet needed → Enters Certificate ID or scans QR code →
+                    Gets simple Safe / Warning / Risky result → Can see basic
+                    certificate details → Cannot see advanced AI analysis
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── PROJECT INFO ─── -->
+          <div
+            class="card-flat"
+            style="
+              background: var(--bg-secondary);
+              text-align: center;
+              padding: 32px;
+            "
+          >
+            <div style="font-size: 2.5rem; margin-bottom: 16px">🚀</div>
+            <h3 style="margin-bottom: 10px">Built as a Learning Project</h3>
+            <p
+              style="
+                font-size: 14px;
+                color: var(--text-muted);
+                max-width: 480px;
+                margin: 0 auto 24px;
+                line-height: 1.7;
+              "
+            >
+              CertChain was built to demonstrate how blockchain technology can
+              solve real-world trust problems in education. It runs entirely on
+              the free Sepolia testnet — no real ETH required.
+            </p>
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                justify-content: center;
+                flex-wrap: wrap;
+              "
+            >
+              <a href="role-select.html" class="btn btn-primary">
+                🎓 Try the Dashboard
+              </a>
+              <a href="public-verify.html" class="btn btn-outline">
+                🔍 Verify a Certificate
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Degree Certificate Verification
+            System<br />
+            <span style="font-size: 12px; opacity: 0.7">
+              Solidity • ethers.js • MetaMask • Sepolia Testnet • AI Fraud
+              Detection
+            </span>
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+
+    <script>
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+    </script>
+  </body>
+</html>

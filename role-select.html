@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Select Role — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <div class="wallet-badge" id="walletBadge">
+              <span class="dot"></span>
+              <span id="walletAddr">Not connected</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <button
+              class="btn btn-ghost btn-sm"
+              onclick="WalletManager.disconnectWallet()"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container-md">
+          <!-- Header -->
+          <div class="section-header text-center" style="margin-bottom: 12px">
+            <div style="font-size: 3rem; margin-bottom: 16px">👋</div>
+            <h2>Welcome to CertChain</h2>
+            <p style="font-size: 15px; margin-top: 8px">
+              Select your role to access the right dashboard.<br />
+              Your wallet address determines your permissions.
+            </p>
+          </div>
+
+          <!-- Wallet connected info box -->
+          <div
+            class="alert alert-info"
+            id="walletAlert"
+            style="
+              max-width: 480px;
+              margin: 0 auto 32px;
+              justify-content: center;
+            "
+          >
+            <span class="alert-icon">🦊</span>
+            <span>Connected as: <strong id="walletFull">—</strong></span>
+          </div>
+
+          <!-- ─── ROLE CARDS ─── -->
+          <div class="role-grid">
+            <!-- ISSUER -->
+            <div class="role-card issuer" onclick="selectRole('issuer', this)">
+              <div class="role-icon">🎓</div>
+              <h3>Issuer</h3>
+              <p>
+                College, University, or Institution.<br />
+                Issue and manage degree certificates stored permanently on the
+                blockchain.
+              </p>
+              <div style="margin-top: 20px">
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: left;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Issue certificates
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Revoke certificates
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Generate PDF with QR
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ View audit log
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 20px">
+                <span class="badge badge-pending">Requires MetaMask</span>
+              </div>
+            </div>
+
+            <!-- VERIFIER -->
+            <div
+              class="role-card verifier"
+              onclick="selectRole('verifier', this)"
+            >
+              <div class="role-icon">🔍</div>
+              <h3>Verifier</h3>
+              <p>
+                Company, Employer, or Organization.<br />
+                Verify certificates with full AI fraud analysis and detailed
+                trust reports.
+              </p>
+              <div style="margin-top: 20px">
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: left;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Full certificate details
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ AI fraud analysis report
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Trust score (0–100)
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Verification history
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 20px">
+                <span class="badge badge-pending">Requires MetaMask</span>
+              </div>
+            </div>
+
+            <!-- PUBLIC -->
+            <div class="role-card public" onclick="selectRole('public', this)">
+              <div class="role-icon">👤</div>
+              <h3>Public User</h3>
+              <p>
+                Student, Parent, or General Public.<br />
+                Quick and simple certificate lookup with easy-to-understand
+                results.
+              </p>
+              <div style="margin-top: 20px">
+                <div
+                  style="
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: left;
+                  "
+                >
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Search by Certificate ID
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Basic certificate details
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ✅ Safe / Warning / Risky label
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      display: flex;
+                      align-items: center;
+                      gap: 6px;
+                    "
+                  >
+                    ⭕ No wallet required
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top: 20px">
+                <span class="badge badge-safe">No Wallet Needed</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── CONFIRM BUTTON ─── -->
+          <div
+            style="text-align: center; margin-top: 40px"
+            id="confirmArea"
+            class="hidden"
+          >
+            <div
+              class="alert alert-success"
+              style="
+                max-width: 400px;
+                margin: 0 auto 20px;
+                justify-content: center;
+              "
+            >
+              <span class="alert-icon">✅</span>
+              <span
+                >Role selected: <strong id="selectedRoleText">—</strong></span
+              >
+            </div>
+
+            <button class="btn btn-primary btn-lg" onclick="confirmRole()">
+              Enter Dashboard →
+            </button>
+
+            <p
+              style="
+                font-size: 13px;
+                color: var(--text-muted);
+                margin-top: 12px;
+              "
+            >
+              You can come back here to switch roles anytime
+            </p>
+          </div>
+
+          <!-- ─── INFO BOX ─── -->
+          <div
+            class="card-flat"
+            style="
+              max-width: 600px;
+              margin: 48px auto 0;
+              background: var(--bg-secondary);
+            "
+          >
+            <h4
+              style="
+                margin-bottom: 16px;
+                font-size: 14px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                color: var(--text-muted);
+              "
+            >
+              ℹ️ How Roles Work
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 10px;
+                  align-items: flex-start;
+                "
+              >
+                <span>🔐</span>
+                <span>
+                  <strong>Issuer & Verifier</strong> require MetaMask. Your
+                  wallet address is your identity — no username or password
+                  needed.
+                </span>
+              </div>
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 10px;
+                  align-items: flex-start;
+                "
+              >
+                <span>👤</span>
+                <span>
+                  <strong>Public User</strong> can verify certificates without
+                  any wallet. Just enter the Certificate ID.
+                </span>
+              </div>
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 10px;
+                  align-items: flex-start;
+                "
+              >
+                <span>🔄</span>
+                <span>
+                  <strong>Switch roles</strong> anytime by coming back to this
+                  page. Your session is saved in the browser.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+
+      // Restore theme
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  TRACK SELECTED ROLE
+      // ─────────────────────────────────────────
+      let selectedRole = null;
+
+      function selectRole(role, cardEl) {
+        selectedRole = role;
+
+        // Remove selected class from all cards
+        document.querySelectorAll(".role-card").forEach((c) => {
+          c.classList.remove("selected");
+        });
+
+        // Add selected to clicked card
+        cardEl.classList.add("selected");
+
+        // Show confirm area
+        const confirmArea = document.getElementById("confirmArea");
+        confirmArea.classList.remove("hidden");
+        confirmArea.style.display = "block";
+
+        // Update role text
+        const roleNames = {
+          issuer: "🎓 Issuer (Institution)",
+          verifier: "🔍 Verifier (Employer)",
+          public: "👤 Public User",
+        };
+        document.getElementById("selectedRoleText").textContent =
+          roleNames[role] || role;
+
+        // Scroll to confirm button smoothly
+        confirmArea.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      // ─────────────────────────────────────────
+      //  CONFIRM ROLE → REDIRECT
+      // ─────────────────────────────────────────
+      function confirmRole() {
+        if (!selectedRole) return;
+
+        // Public user doesn't need wallet
+        if (selectedRole === "public") {
+          WalletManager.saveRole("public");
+          window.location.href = "public-verify.html";
+          return;
+        }
+
+        // Issuer and Verifier need wallet
+        const account = WalletManager.restoreSession();
+        if (!account) {
+          alert(
+            "Wallet not connected!\n\n" +
+              "Please go back to the home page and connect " +
+              "your MetaMask wallet first.\n\n" +
+              "Public users don't need a wallet — select " +
+              "'Public User' if you don't have MetaMask.",
+          );
+          return;
+        }
+
+        // Save role and redirect
+        WalletManager.saveRole(selectedRole);
+
+        const routes = {
+          issuer: "issuer-dashboard.html",
+          verifier: "verifier-dashboard.html",
+        };
+
+        window.location.href = routes[selectedRole];
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", () => {
+        const account = WalletManager.restoreSession();
+
+        // Update wallet badge in navbar
+        const badge = document.getElementById("walletAddr");
+        const alert = document.getElementById("walletAlert");
+
+        if (account) {
+          badge.textContent = WalletManager.formatAddress(account);
+          document.getElementById("walletFull").textContent =
+            WalletManager.formatAddress(account);
+        } else {
+          badge.textContent = "Not connected";
+
+          // Show warning for non-public roles
+          alert.className = "alert alert-warning";
+          alert.innerHTML = `
+      <span class="alert-icon">⚠️</span>
+      <span>
+        Wallet not connected.
+        <a href="index.html">Connect on home page</a>
+        or select <strong>Public User</strong> below.
+      </span>
+    `;
+        }
+
+        // Restore previously saved role (highlight it)
+        const savedRole = WalletManager.getRole();
+        if (savedRole) {
+          const cardMap = {
+            issuer: document.querySelector(".role-card.issuer"),
+            verifier: document.querySelector(".role-card.verifier"),
+            public: document.querySelector(".role-card.public"),
+          };
+          if (cardMap[savedRole]) {
+            selectRole(savedRole, cardMap[savedRole]);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issuer Profile — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge issuer">Issuer</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="issuer-dashboard.html" class="btn btn-ghost btn-sm">
+              ← Dashboard
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container-sm">
+          <!-- Page Header -->
+          <div class="section-header" style="margin-bottom: 32px">
+            <div style="font-size: 2.5rem; margin-bottom: 12px">🏛️</div>
+            <h2>Institution Profile</h2>
+            <p>
+              Set up your institution's profile. This information appears on all
+              certificates you issue.
+            </p>
+          </div>
+
+          <!-- ─── CURRENT PROFILE PREVIEW ─── -->
+          <div
+            class="card"
+            id="profilePreviewCard"
+            style="margin-bottom: 28px; display: none"
+          >
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">👁️</div>
+                Current Profile
+              </div>
+              <span class="badge badge-valid">✅ Registered</span>
+            </div>
+
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 20px;
+                flex-wrap: wrap;
+              "
+            >
+              <!-- Logo preview -->
+              <div
+                id="currentLogoWrap"
+                style="
+                  width: 80px;
+                  height: 80px;
+                  border-radius: var(--radius-md);
+                  border: 2px solid var(--border);
+                  overflow: hidden;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: var(--bg-secondary);
+                  font-size: 2rem;
+                  flex-shrink: 0;
+                "
+              >
+                🏛️
+              </div>
+              <!-- Info -->
+              <div style="flex: 1">
+                <div
+                  style="
+                    font-family: var(--font-display);
+                    font-size: 1.2rem;
+                    font-weight: 700;
+                    color: var(--text-primary);
+                    margin-bottom: 6px;
+                  "
+                  id="currentName"
+                >
+                  —
+                </div>
+                <div
+                  style="
+                    font-size: 13px;
+                    color: var(--text-muted);
+                    font-family: var(--font-mono);
+                  "
+                  id="currentWallet"
+                >
+                  —
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    gap: 16px;
+                    margin-top: 10px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div style="font-size: 13px; color: var(--text-secondary)">
+                    📜 Issued: <strong id="currentIssued">0</strong>
+                  </div>
+                  <div style="font-size: 13px; color: var(--text-secondary)">
+                    🚫 Revoked: <strong id="currentRevoked">0</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ─── PROFILE FORM ─── -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <div class="icon">✏️</div>
+                Edit Profile
+              </div>
+            </div>
+
+            <!-- Institution Name -->
+            <div class="form-group">
+              <label class="form-label">
+                Institution Name <span class="required">*</span>
+              </label>
+              <input
+                type="text"
+                id="institutionName"
+                class="form-control"
+                placeholder="e.g. Gujarat Technological University"
+                maxlength="100"
+              />
+              <div class="form-hint">
+                This name appears on every certificate you issue
+              </div>
+            </div>
+
+            <!-- Logo Upload -->
+            <div class="form-group">
+              <label class="form-label">Institution Logo</label>
+
+              <!-- Upload area -->
+              <div
+                id="logoUploadArea"
+                style="
+                  border: 2px dashed var(--border);
+                  border-radius: var(--radius-md);
+                  padding: 32px;
+                  text-align: center;
+                  cursor: pointer;
+                  transition: all var(--transition);
+                  background: var(--bg-secondary);
+                "
+                onclick="document.getElementById('logoFile').click()"
+                ondragover="handleDragOver(event)"
+                ondrop="handleDrop(event)"
+              >
+                <div id="logoUploadContent">
+                  <div style="font-size: 2.5rem; margin-bottom: 12px">🖼️</div>
+                  <div
+                    style="
+                      font-size: 14px;
+                      font-weight: 600;
+                      color: var(--text-secondary);
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Click to upload or drag & drop
+                  </div>
+                  <div style="font-size: 12px; color: var(--text-muted)">
+                    PNG, JPG, SVG — Max 2MB
+                  </div>
+                </div>
+
+                <!-- Preview inside upload area -->
+                <img
+                  id="logoPreviewImg"
+                  style="
+                    max-width: 120px;
+                    max-height: 120px;
+                    border-radius: var(--radius-md);
+                    display: none;
+                    margin: 0 auto;
+                  "
+                  alt="Logo preview"
+                />
+              </div>
+
+              <input
+                type="file"
+                id="logoFile"
+                accept="image/*"
+                style="display: none"
+                onchange="handleLogoUpload(event)"
+              />
+
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  margin-top: 10px;
+                  flex-wrap: wrap;
+                "
+              >
+                <button
+                  class="btn btn-ghost btn-sm"
+                  onclick="document.getElementById('logoFile').click()"
+                >
+                  📁 Browse File
+                </button>
+                <button class="btn btn-ghost btn-sm" onclick="clearLogo()">
+                  🗑️ Remove Logo
+                </button>
+              </div>
+
+              <div class="form-hint">
+                Logo appears on all generated PDF certificates
+              </div>
+            </div>
+
+            <!-- Issuer Wallet (read-only display) -->
+            <div class="form-group">
+              <label class="form-label">Issuer Wallet Address</label>
+              <div style="display: flex; align-items: center; gap: 10px">
+                <input
+                  type="text"
+                  id="issuerWallet"
+                  class="form-control"
+                  style="font-family: var(--font-mono); font-size: 13px"
+                  readonly
+                  placeholder="Connect wallet to see address"
+                />
+                <button class="copy-btn" onclick="copyWallet()">📋 Copy</button>
+              </div>
+              <div class="form-hint">
+                This is your identity on the blockchain — cannot be changed
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div
+              style="display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap"
+            >
+              <button
+                class="btn btn-primary"
+                id="saveProfileBtn"
+                onclick="saveProfile()"
+              >
+                💾 Save Profile to Blockchain
+              </button>
+              <button
+                class="btn btn-ghost"
+                onclick="window.location.href = 'issuer-dashboard.html'"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <!-- Gas note -->
+            <div class="alert alert-info" style="margin-top: 20px">
+              <span class="alert-icon">⛽</span>
+              <span>
+                Saving profile requires a small gas fee in Sepolia ETH. This
+                stores your institution name permanently on the blockchain.
+              </span>
+            </div>
+          </div>
+
+          <!-- ─── TIPS CARD ─── -->
+          <div
+            class="card-flat"
+            style="
+              margin-top: 24px;
+              background: var(--accent-pale);
+              border: 1px solid var(--accent-light);
+            "
+          >
+            <h4
+              style="margin-bottom: 14px; color: var(--accent); font-size: 14px"
+            >
+              💡 Profile Tips
+            </h4>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 8px;
+                "
+              >
+                <span>🎨</span>
+                <span
+                  >Use a clear, high-contrast logo for best results on
+                  certificates</span
+                >
+              </div>
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 8px;
+                "
+              >
+                <span>📝</span>
+                <span
+                  >Use your institution's full official name as it appears on
+                  documents</span
+                >
+              </div>
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 8px;
+                "
+              >
+                <span>🔄</span>
+                <span
+                  >You can update your profile anytime — old certificates keep
+                  the old info</span
+                >
+              </div>
+              <div
+                style="
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                  display: flex;
+                  gap: 8px;
+                "
+              >
+                <span>🔒</span>
+                <span
+                  >Logo is stored locally in browser — only name goes
+                  on-chain</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  LOGO HANDLING
+      // ─────────────────────────────────────────
+      let logoDataUrl = null;
+
+      function handleLogoUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Size check (2MB)
+        if (file.size > 2 * 1024 * 1024) {
+          alert("Logo file is too large. Please use an image under 2MB.");
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          logoDataUrl = e.target.result;
+          showLogoPreview(logoDataUrl);
+          // Save to localStorage for use on certificates
+          localStorage.setItem("institutionLogo", logoDataUrl);
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function showLogoPreview(dataUrl) {
+        const uploadContent = document.getElementById("logoUploadContent");
+        const previewImg = document.getElementById("logoPreviewImg");
+        const uploadArea = document.getElementById("logoUploadArea");
+
+        uploadContent.style.display = "none";
+        previewImg.src = dataUrl;
+        previewImg.style.display = "block";
+        uploadArea.style.borderColor = "var(--success)";
+        uploadArea.style.background = "var(--success-bg)";
+      }
+
+      function clearLogo() {
+        logoDataUrl = null;
+        localStorage.removeItem("institutionLogo");
+
+        const uploadContent = document.getElementById("logoUploadContent");
+        const previewImg = document.getElementById("logoPreviewImg");
+        const uploadArea = document.getElementById("logoUploadArea");
+        const fileInput = document.getElementById("logoFile");
+
+        uploadContent.style.display = "block";
+        previewImg.style.display = "none";
+        previewImg.src = "";
+        uploadArea.style.borderColor = "var(--border)";
+        uploadArea.style.background = "var(--bg-secondary)";
+        fileInput.value = "";
+      }
+
+      // Drag & drop support
+      function handleDragOver(e) {
+        e.preventDefault();
+        document.getElementById("logoUploadArea").style.borderColor =
+          "var(--primary)";
+      }
+
+      function handleDrop(e) {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith("image/")) {
+          const fakeEvent = { target: { files: [file] } };
+          handleLogoUpload(fakeEvent);
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  COPY WALLET ADDRESS
+      // ─────────────────────────────────────────
+      function copyWallet() {
+        const val = document.getElementById("issuerWallet").value;
+        if (!val || val === "—") return;
+        navigator.clipboard.writeText(val).then(() => {
+          const btn = document.querySelector(".copy-btn");
+          btn.textContent = "✅ Copied";
+          setTimeout(() => (btn.textContent = "📋 Copy"), 2000);
+        });
+      }
+
+      // ─────────────────────────────────────────
+      //  SAVE PROFILE TO BLOCKCHAIN
+      // ─────────────────────────────────────────
+      async function saveProfile() {
+        const name = document.getElementById("institutionName").value.trim();
+
+        // Validate
+        if (!name) {
+          document.getElementById("institutionName").classList.add("error");
+          document.getElementById("institutionName").insertAdjacentHTML(
+            "afterend",
+            `<div class="form-error" style="display:block">
+           Institution name is required
+         </div>`,
+          );
+          return;
+        }
+
+        // Save name to localStorage too (for certificate gen)
+        localStorage.setItem("institutionName", name);
+
+        const btn = document.getElementById("saveProfileBtn");
+        btn.classList.add("btn-loading");
+        btn.textContent = "";
+
+        // Call contract (logo not stored on-chain, only name)
+        const result = await ContractManager.setIssuerProfile(name, "");
+
+        btn.classList.remove("btn-loading");
+        btn.textContent = "💾 Save Profile to Blockchain";
+
+        if (result.success) {
+          // Reload profile display
+          await loadCurrentProfile();
+
+          // Ask to go to dashboard
+          setTimeout(() => {
+            if (confirm("Profile saved! Go to Issuer Dashboard?")) {
+              window.location.href = "issuer-dashboard.html";
+            }
+          }, 1000);
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  LOAD CURRENT PROFILE FROM BLOCKCHAIN
+      // ─────────────────────────────────────────
+      async function loadCurrentProfile() {
+        const account = WalletManager.restoreSession();
+        if (!account) return;
+
+        const result = await ContractManager.getIssuerProfile(account);
+
+        if (result.success && result.isRegistered) {
+          // Show preview card
+          document.getElementById("profilePreviewCard").style.display = "block";
+          document.getElementById("currentName").textContent =
+            result.institutionName;
+          document.getElementById("currentWallet").textContent = account;
+          document.getElementById("currentIssued").textContent =
+            result.totalIssued;
+          document.getElementById("currentRevoked").textContent =
+            result.totalRevoked;
+
+          // Pre-fill form
+          document.getElementById("institutionName").value =
+            result.institutionName;
+
+          // Show saved logo if exists
+          const savedLogo = localStorage.getItem("institutionLogo");
+          if (savedLogo) {
+            logoDataUrl = savedLogo;
+            showLogoPreview(savedLogo);
+
+            // Show in preview card too
+            const logoWrap = document.getElementById("currentLogoWrap");
+            logoWrap.innerHTML = `<img src="${savedLogo}"
+              style="width:100%;height:100%;object-fit:contain"
+              alt="Logo"/>`;
+          }
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", async () => {
+        // Require wallet + issuer role
+        const account = WalletManager.requireWallet();
+        if (!account) return;
+
+        WalletManager.requireRole(["issuer"]);
+
+        // Show wallet address
+        document.getElementById("walletAddr").textContent =
+          WalletManager.formatAddress(account);
+        document.getElementById("issuerWallet").value = account;
+
+        // Load existing profile
+        await loadCurrentProfile();
+      });
+    </script>
+  </body>
+</html>

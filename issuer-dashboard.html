@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Issuer Dashboard — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge issuer">Issuer</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <button
+              class="btn btn-ghost btn-sm"
+              onclick="WalletManager.disconnectWallet()"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container">
+          <!-- ─── PAGE HEADER ─── -->
+          <div
+            style="
+              display: flex;
+              align-items: flex-start;
+              justify-content: space-between;
+              flex-wrap: wrap;
+              gap: 16px;
+              margin-bottom: 32px;
+            "
+          >
+            <div>
+              <h2 style="margin-bottom: 6px">Issuer Dashboard</h2>
+              <p style="font-size: 14px" id="institutionLabel">
+                Loading institution profile...
+              </p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap">
+              <a href="issuer-profile.html" class="btn btn-ghost btn-sm">
+                🏛️ Edit Profile
+              </a>
+              <a href="issue-certificate.html" class="btn btn-primary">
+                ➕ Issue Certificate
+              </a>
+            </div>
+          </div>
+
+          <!-- ─── STATS CARDS ─── -->
+          <div class="stats-grid" style="margin-bottom: 32px">
+            <div class="stat-card">
+              <div class="stat-number" id="stat-total">—</div>
+              <div class="stat-label">Total Issued</div>
+            </div>
+
+            <div class="stat-card">
+              <div
+                class="stat-number"
+                style="color: var(--success)"
+                id="stat-valid"
+              >
+                —
+              </div>
+              <div class="stat-label">Valid</div>
+            </div>
+
+            <div class="stat-card">
+              <div
+                class="stat-number"
+                style="color: var(--danger)"
+                id="stat-revoked"
+              >
+                —
+              </div>
+              <div class="stat-label">Revoked</div>
+            </div>
+
+            <div class="stat-card">
+              <div
+                class="stat-number"
+                style="color: var(--warning)"
+                id="stat-expired"
+              >
+                —
+              </div>
+              <div class="stat-label">Expired</div>
+            </div>
+          </div>
+
+          <!-- ─── MAIN GRID ─── -->
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 340px;
+              gap: 24px;
+              align-items: start;
+            "
+            id="dashGrid"
+          >
+            <!-- LEFT: CERTIFICATES TABLE -->
+            <div>
+              <!-- Search + Filter bar -->
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  margin-bottom: 20px;
+                  flex-wrap: wrap;
+                  align-items: center;
+                "
+              >
+                <div style="flex: 1; position: relative; min-width: 200px">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="form-control"
+                    placeholder="Search by ID, name, or degree..."
+                    oninput="filterCerts()"
+                    style="padding-left: 36px"
+                  />
+                  <span
+                    style="
+                      position: absolute;
+                      left: 12px;
+                      top: 50%;
+                      transform: translateY(-50%);
+                      color: var(--text-muted);
+                    "
+                    >🔍</span
+                  >
+                </div>
+                <select
+                  id="statusFilter"
+                  class="form-control"
+                  style="width: 140px"
+                  onchange="filterCerts()"
+                >
+                  <option value="all">All Status</option>
+                  <option value="valid">Valid</option>
+                  <option value="revoked">Revoked</option>
+                  <option value="expired">Expired</option>
+                </select>
+                <button
+                  class="btn btn-ghost btn-sm"
+                  onclick="loadCertificates()"
+                >
+                  🔄 Refresh
+                </button>
+              </div>
+
+              <!-- Table card -->
+              <div class="card" style="padding: 0; overflow: hidden">
+                <div class="card-header" style="padding: 16px 20px">
+                  <div class="card-title">
+                    <div class="icon">📜</div>
+                    Issued Certificates
+                  </div>
+                  <span
+                    style="font-size: 12px; color: var(--text-muted)"
+                    id="certCount"
+                    >0 certificates</span
+                  >
+                </div>
+
+                <!-- Loading state -->
+                <div
+                  id="tableLoading"
+                  style="padding: 40px; text-align: center"
+                >
+                  <div class="spinner"></div>
+                  <p style="font-size: 13px; margin-top: 8px">
+                    Loading from blockchain...
+                  </p>
+                </div>
+
+                <!-- Empty state -->
+                <div id="tableEmpty" class="hidden">
+                  <div class="empty-state">
+                    <div class="empty-state-icon">📭</div>
+                    <h3>No Certificates Yet</h3>
+                    <p>Issue your first certificate to see it here</p>
+                    <a
+                      href="issue-certificate.html"
+                      class="btn btn-primary"
+                      style="margin-top: 16px"
+                    >
+                      ➕ Issue Certificate
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Table -->
+                <div style="overflow-x: auto">
+                  <table class="cert-table" id="certsTable">
+                    <thead>
+                      <tr>
+                        <th>Certificate ID</th>
+                        <th>Student Name</th>
+                        <th>Degree</th>
+                        <th>Year</th>
+                        <th>Issue Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="certsTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- RIGHT SIDEBAR -->
+            <div style="display: flex; flex-direction: column; gap: 20px">
+              <!-- Quick Actions -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <div class="icon">⚡</div>
+                    Quick Actions
+                  </div>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 10px">
+                  <a
+                    href="issue-certificate.html"
+                    class="btn btn-primary btn-block"
+                  >
+                    📜 Issue New Certificate
+                  </a>
+                  <a
+                    href="certificate-preview.html"
+                    class="btn btn-accent btn-block"
+                  >
+                    🖨️ Generate Last PDF
+                  </a>
+                  <a
+                    href="issuer-profile.html"
+                    class="btn btn-outline btn-block"
+                  >
+                    🏛️ Edit Institution Profile
+                  </a>
+                  <button
+                    class="btn btn-ghost btn-block"
+                    onclick="exportAuditLog()"
+                  >
+                    📥 Export Audit Log
+                  </button>
+                </div>
+              </div>
+
+              <!-- Profile Summary -->
+              <div class="card" id="profileSummary">
+                <div class="card-header">
+                  <div class="card-title">
+                    <div class="icon">🏛️</div>
+                    Institution
+                  </div>
+                  <a
+                    href="issuer-profile.html"
+                    style="font-size: 12px; color: var(--primary)"
+                  >
+                    Edit
+                  </a>
+                </div>
+                <div style="text-align: center; padding: 8px 0">
+                  <!-- Logo -->
+                  <div
+                    id="profileLogo"
+                    style="
+                      width: 64px;
+                      height: 64px;
+                      border-radius: var(--radius-md);
+                      background: var(--bg-secondary);
+                      border: 2px solid var(--border);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 1.8rem;
+                      margin: 0 auto 12px;
+                    "
+                  >
+                    🏛️
+                  </div>
+                  <div
+                    style="
+                      font-family: var(--font-display);
+                      font-weight: 700;
+                      font-size: 15px;
+                      color: var(--text-primary);
+                      margin-bottom: 6px;
+                    "
+                    id="profileName"
+                  >
+                    —
+                  </div>
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      font-family: var(--font-mono);
+                    "
+                    id="profileWallet"
+                  >
+                    —
+                  </div>
+                  <!-- Setup prompt if no profile -->
+                  <div id="setupPrompt" class="hidden" style="margin-top: 12px">
+                    <div
+                      class="alert alert-warning"
+                      style="font-size: 12px; text-align: left"
+                    >
+                      <span>⚠️</span>
+                      <span>
+                        Profile not set up.
+                        <a href="issuer-profile.html">Set up now</a>
+                        to appear on certificates.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Audit Log -->
+              <div class="card" style="padding: 0; overflow: hidden">
+                <div class="card-header" style="padding: 16px 20px">
+                  <div class="card-title">
+                    <div class="icon">📋</div>
+                    Activity Log
+                  </div>
+                  <button
+                    class="btn btn-ghost btn-sm"
+                    onclick="
+                      AuditLog.clear('issuer');
+                      AuditLog.renderTo('auditLogEl', 'issuer');
+                    "
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div id="auditLogEl" class="audit-log"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ═══════════════════════════════════════
+       REVOKE MODAL
+  ═══════════════════════════════════════ -->
+      <div
+        id="revokeModal"
+        style="
+          display: none;
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.5);
+          z-index: 200;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <div
+          class="card"
+          style="max-width: 440px; width: 90%; animation: fadeInUp 0.3s ease"
+        >
+          <div style="text-align: center; margin-bottom: 20px">
+            <div style="font-size: 2.5rem; margin-bottom: 12px">⚠️</div>
+            <h3 style="margin-bottom: 8px">Revoke Certificate?</h3>
+            <p style="font-size: 14px">
+              This action is <strong>permanent and irreversible</strong>
+              on the blockchain. The certificate will be marked as revoked for
+              all future verifications.
+            </p>
+          </div>
+
+          <div
+            class="card-flat"
+            style="
+              background: var(--danger-bg);
+              border: 1px solid var(--danger);
+              margin-bottom: 20px;
+              padding: 14px;
+            "
+          >
+            <div
+              style="
+                font-size: 13px;
+                color: var(--danger);
+                font-weight: 600;
+                margin-bottom: 4px;
+              "
+            >
+              Certificate to Revoke:
+            </div>
+            <div
+              style="
+                font-family: var(--font-mono);
+                font-size: 13px;
+                color: var(--text-primary);
+              "
+              id="revokeModalCertId"
+            >
+              —
+            </div>
+            <div
+              style="
+                font-size: 13px;
+                color: var(--text-secondary);
+                margin-top: 4px;
+              "
+              id="revokeModalName"
+            >
+              —
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 12px">
+            <button
+              class="btn btn-danger btn-block"
+              id="confirmRevokeBtn"
+              onclick="confirmRevoke()"
+            >
+              🚫 Yes, Revoke Certificate
+            </button>
+            <button
+              class="btn btn-ghost btn-block"
+              onclick="closeRevokeModal()"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  ALL CERTIFICATES DATA (for filtering)
+      // ─────────────────────────────────────────
+      let allCerts = [];
+      let revokeTarget = null;
+
+      // ─────────────────────────────────────────
+      //  LOAD CERTIFICATES FROM BLOCKCHAIN
+      // ─────────────────────────────────────────
+      async function loadCertificates() {
+        const account =
+          WalletManager.currentAccount || WalletManager.restoreSession();
+        if (!account) return;
+
+        // Show loading
+        document.getElementById("tableLoading").style.display = "block";
+        document.getElementById("tableEmpty").classList.add("hidden");
+        document.getElementById("certsTable").style.display = "none";
+
+        // Get all cert IDs issued by this wallet
+        const idsResult = await ContractManager.getCertsByIssuer(account);
+        if (!idsResult.success || idsResult.ids.length === 0) {
+          document.getElementById("tableLoading").style.display = "none";
+          document.getElementById("tableEmpty").classList.remove("hidden");
+          updateStats([]);
+          return;
+        }
+
+        // Fetch details for each cert
+        const certPromises = idsResult.ids.map((id) =>
+          ContractManager.getCertificate(id).then((r) => ({
+            ...r,
+            certId: id,
+          })),
+        );
+
+        allCerts = await Promise.all(certPromises);
+        allCerts = allCerts.filter((c) => c.success && c.exists);
+
+        // Hide loading, show table
+        document.getElementById("tableLoading").style.display = "none";
+        document.getElementById("certsTable").style.display = "table";
+
+        renderTable(allCerts);
+        updateStats(allCerts);
+      }
+
+      // ─────────────────────────────────────────
+      //  RENDER TABLE
+      // ─────────────────────────────────────────
+      function renderTable(certs) {
+        const tbody = document.getElementById("certsTableBody");
+        const count = document.getElementById("certCount");
+
+        count.textContent = `${certs.length} certificate${certs.length !== 1 ? "s" : ""}`;
+
+        if (certs.length === 0) {
+          tbody.innerHTML = `
+      <tr>
+        <td colspan="7" style="text-align:center;
+            padding:32px;color:var(--text-muted)">
+          No certificates match your search
+        </td>
+      </tr>`;
+          return;
+        }
+
+        tbody.innerHTML = certs
+          .map((cert) => {
+            // Status badge
+            let statusBadge = "";
+            if (cert.isRevoked) {
+              statusBadge = `<span class="badge badge-revoked">🚫 Revoked</span>`;
+            } else if (cert.isExpired) {
+              statusBadge = `<span class="badge badge-expired">⏰ Expired</span>`;
+            } else {
+              statusBadge = `<span class="badge badge-valid">✅ Valid</span>`;
+            }
+
+            // Actions
+            const revokeBtn = !cert.isRevoked
+              ? `<button class="btn btn-ghost btn-sm"
+                 style="color:var(--danger);border-color:var(--danger)"
+                 onclick="openRevokeModal('${cert.certId}',
+                          '${cert.studentName}')">
+           🚫 Revoke
+         </button>`
+              : `<span style="font-size:12px;color:var(--text-muted)">
+           Revoked
+         </span>`;
+
+            return `
+      <tr>
+        <td>
+          <span class="cert-id">${cert.certId}</span>
+          <button class="copy-btn"
+                  onclick="copyText('${cert.certId}', this)">
+            📋
+          </button>
+        </td>
+        <td style="font-weight:500;color:var(--text-primary)">
+          ${cert.studentName}
+        </td>
+        <td style="color:var(--text-secondary);font-size:13px">
+          ${cert.degree}
+        </td>
+        <td style="font-size:13px">${cert.year}</td>
+        <td style="font-size:12px;color:var(--text-muted)">
+          ${cert.issueDate}
+        </td>
+        <td>${statusBadge}</td>
+        <td>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm"
+                    onclick="viewCertificate('${cert.certId}')">
+              👁️ View
+            </button>
+            <button class="btn btn-ghost btn-sm"
+                    onclick="generatePdf('${cert.certId}')">
+              📄 PDF
+            </button>
+            ${revokeBtn}
+          </div>
+        </td>
+      </tr>`;
+          })
+          .join("");
+      }
+
+      // ─────────────────────────────────────────
+      //  UPDATE STATS
+      // ─────────────────────────────────────────
+      function updateStats(certs) {
+        const total = certs.length;
+        const revoked = certs.filter((c) => c.isRevoked).length;
+        const expired = certs.filter((c) => !c.isRevoked && c.isExpired).length;
+        const valid = total - revoked - expired;
+
+        document.getElementById("stat-total").textContent = total;
+        document.getElementById("stat-valid").textContent = valid;
+        document.getElementById("stat-revoked").textContent = revoked;
+        document.getElementById("stat-expired").textContent = expired;
+      }
+
+      // ─────────────────────────────────────────
+      //  FILTER CERTIFICATES
+      // ─────────────────────────────────────────
+      function filterCerts() {
+        const query = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const status = document.getElementById("statusFilter").value;
+
+        let filtered = allCerts.filter((cert) => {
+          // Text search
+          const matchText =
+            cert.certId.toLowerCase().includes(query) ||
+            cert.studentName.toLowerCase().includes(query) ||
+            cert.degree.toLowerCase().includes(query);
+
+          // Status filter
+          let matchStatus = true;
+          if (status === "valid")
+            matchStatus = !cert.isRevoked && !cert.isExpired;
+          if (status === "revoked") matchStatus = cert.isRevoked;
+          if (status === "expired")
+            matchStatus = cert.isExpired && !cert.isRevoked;
+
+          return matchText && matchStatus;
+        });
+
+        renderTable(filtered);
+      }
+
+      // ─────────────────────────────────────────
+      //  VIEW CERTIFICATE → go to verifier
+      // ─────────────────────────────────────────
+      function viewCertificate(certId) {
+        localStorage.setItem("quickVerifyCertId", certId);
+        window.location.href = "verifier-dashboard.html";
+      }
+
+      // ─────────────────────────────────────────
+      //  GENERATE PDF FOR EXISTING CERT
+      // ─────────────────────────────────────────
+      async function generatePdf(certId) {
+        // Load cert data and store for preview page
+        const result = await ContractManager.getCertificate(certId);
+        if (result.success && result.exists) {
+          const certData = {
+            certId,
+            studentName: result.studentName,
+            degree: result.degree,
+            institution: result.institution,
+            year: result.year,
+            issueDate: result.issueDate,
+            expiryDate: result.expiryDate,
+          };
+          localStorage.setItem("lastIssuedCert", JSON.stringify(certData));
+          window.location.href = "certificate-preview.html";
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  COPY TEXT HELPER
+      // ─────────────────────────────────────────
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = "✅";
+          setTimeout(() => (btn.textContent = orig), 1500);
+        });
+      }
+
+      // ─────────────────────────────────────────
+      //  REVOKE MODAL
+      // ─────────────────────────────────────────
+      function openRevokeModal(certId, studentName) {
+        revokeTarget = certId;
+        document.getElementById("revokeModalCertId").textContent = certId;
+        document.getElementById("revokeModalName").textContent =
+          "Student: " + studentName;
+        const modal = document.getElementById("revokeModal");
+        modal.style.display = "flex";
+        modal.style.alignItems = "center";
+        modal.style.justifyContent = "center";
+      }
+
+      function closeRevokeModal() {
+        document.getElementById("revokeModal").style.display = "none";
+        revokeTarget = null;
+      }
+
+      async function confirmRevoke() {
+        if (!revokeTarget) return;
+
+        const btn = document.getElementById("confirmRevokeBtn");
+        btn.classList.add("btn-loading");
+        btn.textContent = "";
+
+        const result = await ContractManager.revokeCertificate(revokeTarget);
+
+        btn.classList.remove("btn-loading");
+        btn.textContent = "🚫 Yes, Revoke Certificate";
+
+        if (result.success) {
+          closeRevokeModal();
+          // Reload certificates
+          await loadCertificates();
+        }
+      }
+
+      // Close modal on backdrop click
+      document
+        .getElementById("revokeModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) closeRevokeModal();
+        });
+
+      // ─────────────────────────────────────────
+      //  EXPORT AUDIT LOG AS JSON
+      // ─────────────────────────────────────────
+      function exportAuditLog() {
+        const account = WalletManager.currentAccount;
+        const logs = AuditLog.getAll("issuer");
+
+        if (logs.length === 0) {
+          alert("No audit log entries to export.");
+          return;
+        }
+
+        const data = JSON.stringify(logs, null, 2);
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `certchain-audit-${account?.slice(0, 8)}-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ─────────────────────────────────────────
+      //  LOAD ISSUER PROFILE
+      // ─────────────────────────────────────────
+      async function loadProfile(account) {
+        // Try localStorage first (fast)
+        const savedName = localStorage.getItem("institutionName");
+        const savedLogo = localStorage.getItem("institutionLogo");
+
+        if (savedName) {
+          document.getElementById("profileName").textContent = savedName;
+          document.getElementById("institutionLabel").textContent =
+            "🏛️ " + savedName;
+        }
+
+        if (savedLogo) {
+          document.getElementById("profileLogo").innerHTML =
+            `<img src="${savedLogo}"
+            style="width:100%;height:100%;object-fit:contain;
+                   border-radius:var(--radius-sm)"
+            alt="Logo"/>`;
+        }
+
+        document.getElementById("profileWallet").textContent =
+          WalletManager.formatAddress(account);
+
+        // Also load from blockchain
+        const result = await ContractManager.getIssuerProfile(account);
+        if (result.success) {
+          if (result.isRegistered) {
+            document.getElementById("profileName").textContent =
+              result.institutionName;
+            document.getElementById("institutionLabel").textContent =
+              "🏛️ " + result.institutionName;
+          } else {
+            // No profile set up
+            document.getElementById("profileName").textContent =
+              "Profile Not Set Up";
+            document.getElementById("institutionLabel").textContent =
+              "No institution profile found";
+            document.getElementById("setupPrompt").classList.remove("hidden");
+          }
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", async () => {
+        // Require wallet + issuer role
+        const account = WalletManager.requireWallet();
+        if (!account) return;
+        WalletManager.requireRole(["issuer"]);
+
+        // Show wallet in navbar
+        document.getElementById("walletAddr").textContent =
+          WalletManager.formatAddress(account);
+
+        // Load profile + certificates + audit log
+        await loadProfile(account);
+        await loadCertificates();
+        AuditLog.renderTo("auditLogEl", "issuer", 15);
+
+        // Check if returning from quick verify
+        const quickId = localStorage.getItem("quickVerifyCertId");
+        if (quickId) {
+          localStorage.removeItem("quickVerifyCertId");
+        }
+      });
+    </script>
+  </body>
+</html>

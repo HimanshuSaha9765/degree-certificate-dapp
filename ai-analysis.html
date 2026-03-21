@@ -1,0 +1,813 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Analysis Report — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge verifier">Verifier</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="verifier-dashboard.html" class="btn btn-ghost btn-sm">
+              ← Back
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <div class="container-md">
+          <!-- No data fallback -->
+          <div
+            id="noDataMsg"
+            class="hidden"
+            style="text-align: center; padding: 80px 0"
+          >
+            <div style="font-size: 3rem; margin-bottom: 16px">🤖</div>
+            <h3>No Analysis Data</h3>
+            <p style="margin: 12px 0 24px">
+              Please verify a certificate first to see the full AI analysis
+              report.
+            </p>
+            <a href="verifier-dashboard.html" class="btn btn-primary">
+              🔍 Go to Verifier Dashboard
+            </a>
+          </div>
+
+          <!-- Main report (hidden until data loads) -->
+          <div id="reportContent" class="hidden">
+            <!-- ─── REPORT HEADER ─── -->
+            <div
+              style="
+                background: linear-gradient(
+                  135deg,
+                  var(--primary),
+                  var(--primary-light)
+                );
+                border-radius: var(--radius-xl);
+                padding: 32px;
+                margin-bottom: 28px;
+                color: white;
+                position: relative;
+                overflow: hidden;
+              "
+            >
+              <!-- bg decoration -->
+              <div
+                style="
+                  position: absolute;
+                  top: -20px;
+                  right: -20px;
+                  width: 150px;
+                  height: 150px;
+                  border-radius: 50%;
+                  background: rgba(255, 255, 255, 0.05);
+                "
+              ></div>
+              <div
+                style="
+                  position: absolute;
+                  bottom: -30px;
+                  right: 60px;
+                  width: 100px;
+                  height: 100px;
+                  border-radius: 50%;
+                  background: rgba(255, 255, 255, 0.04);
+                "
+              ></div>
+
+              <div style="position: relative; z-index: 1">
+                <div
+                  style="
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 16px;
+                  "
+                >
+                  <div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: rgba(255, 255, 255, 0.7);
+                        text-transform: uppercase;
+                        letter-spacing: 1px;
+                        margin-bottom: 8px;
+                      "
+                    >
+                      🤖 AI Fraud Detection Report
+                    </div>
+                    <h2
+                      style="color: white; margin-bottom: 6px"
+                      id="report-certId"
+                    >
+                      Certificate ID
+                    </h2>
+                    <div
+                      style="font-size: 14px; color: rgba(255, 255, 255, 0.8)"
+                      id="report-studentName"
+                    >
+                      —
+                    </div>
+                  </div>
+
+                  <!-- Trust score big display -->
+                  <div
+                    style="
+                      text-align: center;
+                      background: rgba(255, 255, 255, 0.12);
+                      border: 1px solid rgba(255, 255, 255, 0.2);
+                      border-radius: var(--radius-lg);
+                      padding: 20px 28px;
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 3rem;
+                        font-weight: 700;
+                        color: white;
+                        line-height: 1;
+                      "
+                      id="report-score"
+                    >
+                      —
+                    </div>
+                    <div
+                      style="
+                        font-size: 12px;
+                        color: rgba(255, 255, 255, 0.7);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                        margin-top: 4px;
+                      "
+                    >
+                      Trust Score
+                    </div>
+                    <div style="margin-top: 8px" id="report-riskBadge"></div>
+                  </div>
+                </div>
+
+                <!-- Meta row -->
+                <div
+                  style="
+                    display: flex;
+                    gap: 24px;
+                    margin-top: 20px;
+                    flex-wrap: wrap;
+                  "
+                >
+                  <div
+                    style="font-size: 13px; color: rgba(255, 255, 255, 0.75)"
+                  >
+                    📅 Analyzed:
+                    <strong style="color: white" id="report-time">—</strong>
+                  </div>
+                  <div
+                    style="font-size: 13px; color: rgba(255, 255, 255, 0.75)"
+                  >
+                    🔬 Checks:
+                    <strong style="color: white" id="report-checkCount"
+                      >—</strong
+                    >
+                  </div>
+                  <div
+                    style="font-size: 13px; color: rgba(255, 255, 255, 0.75)"
+                  >
+                    🚩 Flags:
+                    <strong style="color: white" id="report-flagCount"
+                      >—</strong
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ─── SUMMARY + RECOMMENDATION ─── -->
+            <div class="card" style="margin-bottom: 24px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">📝</div>
+                  Analysis Summary
+                </div>
+              </div>
+              <div
+                style="
+                  font-size: 15px;
+                  font-weight: 600;
+                  color: var(--text-primary);
+                  margin-bottom: 10px;
+                "
+                id="report-summary"
+              >
+                —
+              </div>
+              <div
+                style="
+                  font-size: 14px;
+                  color: var(--text-secondary);
+                  line-height: 1.7;
+                "
+                id="report-recommendation"
+              >
+                —
+              </div>
+            </div>
+
+            <!-- ─── HOW AI WORKS EXPLAINER ─── -->
+            <div
+              class="card-flat"
+              style="
+                background: var(--primary-pale);
+                border: 1px solid var(--border);
+                margin-bottom: 24px;
+                padding: 20px;
+              "
+            >
+              <h4
+                style="
+                  margin-bottom: 14px;
+                  font-size: 13px;
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  color: var(--primary);
+                "
+              >
+                🧠 How This AI Analysis Works
+              </h4>
+              <div
+                style="
+                  display: grid;
+                  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                  gap: 16px;
+                  font-size: 13px;
+                  color: var(--text-secondary);
+                "
+              >
+                <div style="display: flex; gap: 8px">
+                  <span>1️⃣</span>
+                  <span>
+                    <strong>Existence Check</strong> — Confirms the certificate
+                    exists on the blockchain
+                  </span>
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span>2️⃣</span>
+                  <span>
+                    <strong>Duplicate Detection</strong> — Checks if the same ID
+                    was attempted more than once
+                  </span>
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span>3️⃣</span>
+                  <span>
+                    <strong>Pattern Analysis</strong> — Detects if same student
+                    has suspicious number of degrees
+                  </span>
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span>4️⃣</span>
+                  <span>
+                    <strong>Bulk Issuing Check</strong> — Flags if issuer issued
+                    certificates unusually fast
+                  </span>
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span>5️⃣</span>
+                  <span>
+                    <strong>Data Validation</strong> — Verifies all fields are
+                    complete and correctly formatted
+                  </span>
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span>6️⃣</span>
+                  <span>
+                    <strong>Trust Score</strong> — 0–100 score based on all
+                    checks combined
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ─── FLAGS ─── -->
+            <div class="card" style="margin-bottom: 24px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">🚩</div>
+                  Fraud Flags
+                </div>
+                <span id="flag-count-badge" class="badge">0 flags</span>
+              </div>
+              <div id="report-flags">—</div>
+            </div>
+
+            <!-- ─── DETAILED CHECKS ─── -->
+            <div class="card" style="margin-bottom: 24px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">🔬</div>
+                  Detailed Check Results
+                </div>
+                <div style="display: flex; gap: 8px">
+                  <span id="pass-count" class="badge badge-valid">0 pass</span>
+                  <span id="fail-count" class="badge badge-revoked"
+                    >0 fail</span
+                  >
+                </div>
+              </div>
+              <div id="report-checks">—</div>
+            </div>
+
+            <!-- ─── SCORE BREAKDOWN ─── -->
+            <div class="card" style="margin-bottom: 24px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">📊</div>
+                  Score Breakdown
+                </div>
+              </div>
+              <div id="report-scoreBreakdown">—</div>
+
+              <!-- Score scale legend -->
+              <div
+                style="
+                  margin-top: 20px;
+                  padding: 16px;
+                  background: var(--bg-secondary);
+                  border-radius: var(--radius-md);
+                "
+              >
+                <div
+                  style="
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: var(--text-muted);
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    margin-bottom: 10px;
+                  "
+                >
+                  Score Scale
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    height: 12px;
+                    border-radius: var(--radius-full);
+                    overflow: hidden;
+                    margin-bottom: 8px;
+                  "
+                >
+                  <div style="flex: 3; background: var(--danger)"></div>
+                  <div style="flex: 3; background: var(--warning)"></div>
+                  <div style="flex: 4; background: var(--success)"></div>
+                </div>
+                <div
+                  style="
+                    display: flex;
+                    justify-content: space-between;
+                    font-size: 11px;
+                    color: var(--text-muted);
+                  "
+                >
+                  <span style="color: var(--danger)">
+                    🚨 High Risk (0–49)
+                  </span>
+                  <span style="color: var(--warning)">
+                    ⚠️ Medium Risk (50–79)
+                  </span>
+                  <span style="color: var(--success)"> ✅ Safe (80–100) </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ─── CERTIFICATE DETAILS ─── -->
+            <div class="card" style="margin-bottom: 24px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">📜</div>
+                  Certificate Details
+                </div>
+                <div id="cert-status-badge"></div>
+              </div>
+              <div class="cert-detail-grid" id="report-certDetails">—</div>
+            </div>
+
+            <!-- ─── ACTION BUTTONS ─── -->
+            <div
+              style="
+                display: flex;
+                gap: 12px;
+                flex-wrap: wrap;
+                margin-bottom: 40px;
+              "
+            >
+              <button class="btn btn-primary" onclick="exportReport()">
+                📥 Export Report (JSON)
+              </button>
+              <button class="btn btn-outline" onclick="window.print()">
+                🖨️ Print Report
+              </button>
+              <a href="verifier-dashboard.html" class="btn btn-ghost">
+                ← Back to Dashboard
+              </a>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+    <script src="js/ai-engine.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  RENDER FULL REPORT
+      // ─────────────────────────────────────────
+      function renderReport(certId, cert, analysis) {
+        // ── Header ──
+        document.getElementById("report-certId").textContent = certId;
+        document.getElementById("report-studentName").textContent =
+          cert.studentName + " — " + cert.degree;
+        document.getElementById("report-score").textContent = analysis.score;
+        document.getElementById("report-time").textContent =
+          new Date().toLocaleString();
+        document.getElementById("report-checkCount").textContent =
+          analysis.checks.length;
+        document.getElementById("report-flagCount").textContent =
+          analysis.flags.length;
+
+        // Risk badge
+        const riskColor =
+          analysis.riskLevel === "Safe"
+            ? "var(--success)"
+            : analysis.riskLevel === "Medium Risk"
+              ? "var(--warning)"
+              : "var(--danger)";
+        const riskIcon =
+          analysis.riskLevel === "Safe"
+            ? "✅"
+            : analysis.riskLevel === "Medium Risk"
+              ? "⚠️"
+              : "🚨";
+
+        document.getElementById("report-riskBadge").innerHTML =
+          `<span style="background:rgba(255,255,255,0.2);
+                   color:white;padding:4px 12px;
+                   border-radius:var(--radius-full);
+                   font-size:12px;font-weight:600">
+       ${riskIcon} ${analysis.riskLevel}
+     </span>`;
+
+        // ── Summary ──
+        document.getElementById("report-summary").textContent =
+          analysis.summary;
+        document.getElementById("report-recommendation").textContent =
+          analysis.recommendation;
+
+        // ── Flags ──
+        const flagBadge = document.getElementById("flag-count-badge");
+        flagBadge.textContent = `${analysis.flags.length} flag(s)`;
+        flagBadge.className = `badge ${
+          analysis.flags.length === 0
+            ? "badge-valid"
+            : analysis.riskLevel === "High Risk"
+              ? "badge-risky"
+              : "badge-warning"
+        }`;
+
+        if (analysis.flags.length === 0) {
+          document.getElementById("report-flags").innerHTML =
+            `<div class="alert alert-success">
+         <span class="alert-icon">✅</span>
+         <span>
+           No fraud flags detected. This certificate passed
+           all pattern analysis checks.
+         </span>
+       </div>`;
+        } else {
+          document.getElementById("report-flags").innerHTML = analysis.flags
+            .map(
+              (flag) => `
+        <div class="ai-flag ${flag.type}"
+             style="margin-bottom:10px">
+          <div class="ai-flag-icon">${flag.icon}</div>
+          <div class="ai-flag-text">
+            <div class="ai-flag-title">${flag.title}</div>
+            <div class="ai-flag-desc">${flag.description}</div>
+            ${
+              flag.detail
+                ? `
+              <div style="margin-top:6px;font-size:12px;
+                           opacity:0.85;font-style:italic">
+                ${flag.detail}
+              </div>`
+                : ""
+            }
+          </div>
+          <div style="font-size:11px;font-weight:700;
+                       text-transform:uppercase;
+                       align-self:flex-start;margin-left:8px">
+            ${
+              flag.type === "danger"
+                ? "HIGH"
+                : flag.type === "warning"
+                  ? "MEDIUM"
+                  : "INFO"
+            }
+          </div>
+        </div>`,
+            )
+            .join("");
+        }
+
+        // ── Detailed Checks ──
+        const passed = analysis.checks.filter((c) => c.passed).length;
+        const failed = analysis.checks.length - passed;
+        document.getElementById("pass-count").textContent = `${passed} pass`;
+        document.getElementById("fail-count").textContent = `${failed} fail`;
+
+        document.getElementById("report-checks").innerHTML =
+          `<div style="border:1px solid var(--border);
+                  border-radius:var(--radius-md);
+                  overflow:hidden">
+       ${analysis.checks
+         .map(
+           (check, i) => `
+         <div style="display:flex;align-items:flex-start;
+                      gap:12px;padding:14px 16px;
+                      ${
+                        i < analysis.checks.length - 1
+                          ? "border-bottom:1px solid var(--border)"
+                          : ""
+                      }
+                      background:${
+                        check.passed ? "transparent" : "var(--danger-bg)"
+                      }">
+           <span style="font-size:18px;flex-shrink:0;margin-top:1px">
+             ${check.passed ? "✅" : "❌"}
+           </span>
+           <div style="flex:1">
+             <div style="font-weight:600;font-size:14px;
+                          color:var(--text-primary);margin-bottom:3px">
+               ${check.name}
+             </div>
+             <div style="font-size:13px;color:var(--text-secondary)">
+               ${check.detail}
+             </div>
+             ${
+               check.impact
+                 ? `
+               <div style="font-size:12px;margin-top:4px;
+                             color:${
+                               check.passed ? "var(--success)" : "var(--danger)"
+                             }">
+                 Impact: ${check.impact}
+               </div>`
+                 : ""
+             }
+           </div>
+           <div style="text-align:right;flex-shrink:0">
+             <span style="font-size:12px;font-weight:700;
+                           padding:3px 10px;border-radius:
+                           var(--radius-full);
+                           background:${
+                             check.passed
+                               ? "var(--success-bg)"
+                               : "var(--danger-bg)"
+                           };
+                           color:${
+                             check.passed ? "var(--success)" : "var(--danger)"
+                           }">
+               ${check.passed ? "PASS" : "FAIL"}
+             </span>
+             ${
+               check.scoreImpact !== undefined
+                 ? `
+               <div style="font-size:11px;color:var(--text-muted);
+                             margin-top:4px">
+                 ${
+                   check.scoreImpact > 0
+                     ? "+" + check.scoreImpact
+                     : check.scoreImpact
+                 } pts
+               </div>`
+                 : ""
+             }
+           </div>
+         </div>`,
+         )
+         .join("")}
+     </div>`;
+
+        // ── Score Breakdown ──
+        const breakdown = analysis.scoreBreakdown || [];
+        if (breakdown.length > 0) {
+          document.getElementById("report-scoreBreakdown").innerHTML = breakdown
+            .map(
+              (item) => `
+        <div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;
+                       font-size:13px;margin-bottom:5px">
+            <span style="color:var(--text-secondary);
+                          font-weight:500">${item.category}</span>
+            <span style="font-weight:700;
+                          color:${
+                            item.score >= 80
+                              ? "var(--success)"
+                              : item.score >= 50
+                                ? "var(--warning)"
+                                : "var(--danger)"
+                          }"
+                 >${item.score}/${item.maxScore}</span>
+          </div>
+          <div style="height:8px;background:var(--bg-secondary);
+                       border-radius:var(--radius-full);overflow:hidden">
+            <div style="height:100%;width:${
+              (item.score / item.maxScore) * 100
+            }%;
+                          background:${
+                            item.score / item.maxScore >= 0.8
+                              ? "var(--success)"
+                              : item.score / item.maxScore >= 0.5
+                                ? "var(--warning)"
+                                : "var(--danger)"
+                          };
+                          border-radius:var(--radius-full);
+                          transition:width 1s ease">
+            </div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);
+                       margin-top:3px">${item.note}</div>
+        </div>`,
+            )
+            .join("");
+        } else {
+          document.getElementById("report-scoreBreakdown").innerHTML =
+            `<p style="color:var(--text-muted);font-size:13px">
+         Score breakdown not available.
+       </p>`;
+        }
+
+        // ── Certificate Details ──
+        let statusBadge = "";
+        if (cert.isRevoked) {
+          statusBadge = `<span class="badge badge-revoked">🚫 Revoked</span>`;
+        } else if (cert.isExpired) {
+          statusBadge = `<span class="badge badge-expired">⏰ Expired</span>`;
+        } else if (cert.isValid) {
+          statusBadge = `<span class="badge badge-valid">✅ Valid</span>`;
+        }
+        document.getElementById("cert-status-badge").innerHTML = statusBadge;
+
+        const details = [
+          { label: "Certificate ID", value: certId, mono: true },
+          { label: "Student Name", value: cert.studentName, mono: false },
+          { label: "Degree", value: cert.degree, mono: false },
+          { label: "Institution", value: cert.institution, mono: false },
+          { label: "Graduation Year", value: cert.year, mono: false },
+          { label: "Issue Date", value: cert.issueDate, mono: false },
+          { label: "Expiry", value: cert.expiryDate, mono: false },
+          { label: "Issuer Wallet", value: cert.issuer, mono: true },
+        ];
+
+        document.getElementById("report-certDetails").innerHTML = details
+          .map(
+            (d) => `
+      <div class="cert-detail-item">
+        <div class="cert-detail-label">${d.label}</div>
+        <div class="cert-detail-value ${d.mono ? "font-mono" : ""}"
+             style="${d.mono ? "font-size:11px" : ""}">
+          ${d.value || "—"}
+        </div>
+      </div>`,
+          )
+          .join("");
+
+        // Show report
+        document.getElementById("reportContent").classList.remove("hidden");
+        document.getElementById("reportContent").style.display = "block";
+      }
+
+      // ─────────────────────────────────────────
+      //  EXPORT REPORT AS JSON
+      // ─────────────────────────────────────────
+      function exportReport() {
+        let stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem("lastVerifiedCert"));
+        } catch (e) {}
+
+        if (!stored) {
+          alert("No report data to export.");
+          return;
+        }
+
+        const report = {
+          reportGeneratedAt: new Date().toISOString(),
+          certId: stored.certId,
+          certificateDetails: stored.cert,
+          aiAnalysis: stored.analysis,
+          generatedBy: "CertChain AI Fraud Detection Engine v1.0",
+        };
+
+        const blob = new Blob([JSON.stringify(report, null, 2)], {
+          type: "application/json",
+        });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `AI-Report-${stored.certId}-${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", () => {
+        // Restore theme
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+
+        // Wallet display
+        const account = WalletManager.restoreSession();
+        if (account) {
+          document.getElementById("walletAddr").textContent =
+            WalletManager.formatAddress(account);
+        }
+
+        // Load stored analysis data
+        let stored = null;
+        try {
+          stored = JSON.parse(localStorage.getItem("lastVerifiedCert"));
+        } catch (e) {}
+
+        if (!stored || !stored.analysis) {
+          document.getElementById("noDataMsg").classList.remove("hidden");
+          document.getElementById("noDataMsg").style.display = "block";
+          return;
+        }
+
+        renderReport(stored.certId, stored.cert, stored.analysis);
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CertChain — Blockchain Certificate Verification</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <!-- Favicon emoji -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <!-- Brand -->
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+
+          <!-- Nav Links -->
+          <div class="navbar-actions" style="gap: 20px">
+            <a
+              href="about.html"
+              style="
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-secondary);
+              "
+            >
+              About
+            </a>
+            <a
+              href="public-verify.html"
+              style="
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text-secondary);
+              "
+            >
+              Verify
+            </a>
+            <!-- Dark mode toggle -->
+            <button
+              class="dark-toggle"
+              onclick="toggleDark()"
+              title="Toggle dark mode"
+            >
+              🌙
+            </button>
+            <!-- Connect Wallet -->
+            <button
+              class="btn btn-primary"
+              id="connectBtn"
+              onclick="handleConnect()"
+            >
+              🦊 Connect Wallet
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       HERO SECTION
+  ═══════════════════════════════════════ -->
+      <section class="hero">
+        <div class="hero-content container">
+          <div class="hero-eyebrow">🔗 Powered by Sepolia Blockchain</div>
+
+          <h1>
+            Certificate Verification<br />
+            <span>You Can Trust</span>
+          </h1>
+
+          <p>
+            Issue, verify, and authenticate academic certificates on the
+            blockchain. Tamper-proof. Instant. Transparent.
+          </p>
+
+          <div
+            style="
+              display: flex;
+              gap: 16px;
+              justify-content: center;
+              flex-wrap: wrap;
+            "
+          >
+            <a href="role-select.html" class="btn btn-accent btn-xl">
+              🚀 Get Started
+            </a>
+            <a
+              href="public-verify.html"
+              class="btn btn-xl"
+              style="
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                color: white;
+              "
+            >
+              🔍 Quick Verify
+            </a>
+          </div>
+
+          <!-- Wallet status shown after connect -->
+          <div
+            id="walletInfo"
+            class="hidden"
+            style="
+              margin-top: 28px;
+              display: inline-flex;
+              align-items: center;
+              gap: 10px;
+              background: rgba(255, 255, 255, 0.12);
+              border: 1px solid rgba(255, 255, 255, 0.2);
+              border-radius: var(--radius-full);
+              padding: 8px 20px;
+              font-size: 14px;
+              color: white;
+            "
+          >
+            <span
+              style="
+                width: 8px;
+                height: 8px;
+                background: #34d399;
+                border-radius: 50%;
+                display: inline-block;
+              "
+            ></span>
+            <span id="walletAddress">—</span>
+            <span style="opacity: 0.6">connected</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       FEATURES SECTION
+  ═══════════════════════════════════════ -->
+      <section style="padding: 80px 0">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2>Why CertChain?</h2>
+            <p>
+              Built for institutions, employers, and students who need certainty
+            </p>
+          </div>
+
+          <div class="grid-3" style="margin-top: 40px">
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">🔒</div>
+              <h3 style="margin-bottom: 10px">Tamper-Proof</h3>
+              <p style="font-size: 14px">
+                Every certificate is stored permanently on the Ethereum
+                blockchain. No one can alter or delete it — ever.
+              </p>
+            </div>
+
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">⚡</div>
+              <h3 style="margin-bottom: 10px">Instant Verification</h3>
+              <p style="font-size: 14px">
+                Verify any certificate in seconds. No emails, no phone calls, no
+                waiting for registrar responses.
+              </p>
+            </div>
+
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">🤖</div>
+              <h3 style="margin-bottom: 10px">AI Fraud Detection</h3>
+              <p style="font-size: 14px">
+                Our intelligent rule-based engine analyzes patterns and flags
+                suspicious certificates with a Trust Score.
+              </p>
+            </div>
+
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">📜</div>
+              <h3 style="margin-bottom: 10px">PDF Certificate</h3>
+              <p style="font-size: 14px">
+                Generate a beautiful, printable PDF certificate with QR code and
+                digital signature for the student.
+              </p>
+            </div>
+
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">👥</div>
+              <h3 style="margin-bottom: 10px">3 User Roles</h3>
+              <p style="font-size: 14px">
+                Separate dashboards for Issuers, Verifiers, and Public users —
+                each with the right level of access.
+              </p>
+            </div>
+
+            <div class="card" style="text-align: center">
+              <div style="font-size: 2.5rem; margin-bottom: 16px">📊</div>
+              <h3 style="margin-bottom: 10px">Audit Trail</h3>
+              <p style="font-size: 14px">
+                Every action is logged. Issuers and Verifiers can see their
+                complete activity history.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       HOW IT WORKS
+  ═══════════════════════════════════════ -->
+      <section style="padding: 60px 0; background: var(--bg-secondary)">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2>How It Works</h2>
+            <p>Three simple steps from issuance to verification</p>
+          </div>
+
+          <div
+            style="
+              display: flex;
+              gap: 0;
+              align-items: flex-start;
+              margin-top: 48px;
+              flex-wrap: wrap;
+              justify-content: center;
+            "
+          >
+            <!-- Step 1 -->
+            <div
+              style="
+                flex: 1;
+                min-width: 220px;
+                text-align: center;
+                padding: 0 24px;
+                position: relative;
+              "
+            >
+              <div
+                style="
+                  width: 64px;
+                  height: 64px;
+                  background: var(--primary);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 0 auto 20px;
+                  font-size: 24px;
+                  color: white;
+                  font-weight: 700;
+                  font-family: var(--font-display);
+                "
+              >
+                1
+              </div>
+              <h4 style="margin-bottom: 10px">Institution Issues</h4>
+              <p style="font-size: 13px">
+                College connects MetaMask wallet, fills certificate details, and
+                stores them on the blockchain.
+              </p>
+            </div>
+
+            <!-- Arrow -->
+            <div
+              style="
+                font-size: 2rem;
+                color: var(--border);
+                padding: 16px 0;
+                align-self: center;
+                flex-shrink: 0;
+              "
+            >
+              →
+            </div>
+
+            <!-- Step 2 -->
+            <div
+              style="
+                flex: 1;
+                min-width: 220px;
+                text-align: center;
+                padding: 0 24px;
+              "
+            >
+              <div
+                style="
+                  width: 64px;
+                  height: 64px;
+                  background: var(--accent);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 0 auto 20px;
+                  font-size: 24px;
+                  color: white;
+                  font-weight: 700;
+                  font-family: var(--font-display);
+                "
+              >
+                2
+              </div>
+              <h4 style="margin-bottom: 10px">Student Receives PDF</h4>
+              <p style="font-size: 13px">
+                A beautiful PDF certificate with QR code is generated and given
+                to the student for sharing.
+              </p>
+            </div>
+
+            <!-- Arrow -->
+            <div
+              style="
+                font-size: 2rem;
+                color: var(--border);
+                padding: 16px 0;
+                align-self: center;
+                flex-shrink: 0;
+              "
+            >
+              →
+            </div>
+
+            <!-- Step 3 -->
+            <div
+              style="
+                flex: 1;
+                min-width: 220px;
+                text-align: center;
+                padding: 0 24px;
+              "
+            >
+              <div
+                style="
+                  width: 64px;
+                  height: 64px;
+                  background: var(--success);
+                  border-radius: 50%;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 0 auto 20px;
+                  font-size: 24px;
+                  color: white;
+                  font-weight: 700;
+                  font-family: var(--font-display);
+                "
+              >
+                3
+              </div>
+              <h4 style="margin-bottom: 10px">Employer Verifies</h4>
+              <p style="font-size: 13px">
+                Employer scans QR or enters Certificate ID — gets instant
+                blockchain verification + AI fraud report.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       STATS BANNER
+  ═══════════════════════════════════════ -->
+      <section style="padding: 60px 0">
+        <div class="container">
+          <div class="stats-grid" style="max-width: 800px; margin: 0 auto">
+            <div class="stat-card">
+              <div class="stat-number" id="totalCerts">—</div>
+              <div class="stat-label">Certificates Issued</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-number">3</div>
+              <div class="stat-label">User Roles</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-number">100%</div>
+              <div class="stat-label">On-Chain Storage</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-number">0</div>
+              <div class="stat-label">Central Servers</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       CTA SECTION
+  ═══════════════════════════════════════ -->
+      <section style="padding: 60px 0 80px; text-align: center">
+        <div class="container-sm">
+          <h2 style="margin-bottom: 16px">Ready to get started?</h2>
+          <p style="margin-bottom: 32px; font-size: 15px">
+            Connect your MetaMask wallet and choose your role to access your
+            dashboard.
+          </p>
+          <a href="role-select.html" class="btn btn-primary btn-xl">
+            🎓 Enter Dashboard
+          </a>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       FOOTER
+  ═══════════════════════════════════════ -->
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Degree Certificate Verification
+            System<br />
+            <span style="font-size: 12px; opacity: 0.7">
+              Built on Ethereum Sepolia Testnet • Powered by ethers.js &
+              Solidity • AI Fraud Detection Engine
+            </span>
+          </p>
+        </div>
+      </footer>
+    </div>
+    <!-- end page-wrapper -->
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE TOGGLE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+
+      // Restore saved theme
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  CONNECT WALLET
+      // ─────────────────────────────────────────
+      async function handleConnect() {
+        const btn = document.getElementById("connectBtn");
+        btn.classList.add("btn-loading");
+        btn.textContent = "";
+
+        const account = await WalletManager.connectWallet();
+
+        btn.classList.remove("btn-loading");
+
+        if (account) {
+          // Show wallet info
+          document.getElementById("walletAddress").textContent =
+            WalletManager.formatAddress(account);
+          document.getElementById("walletInfo").classList.remove("hidden");
+          document.getElementById("walletInfo").style.display = "inline-flex";
+
+          // Update button
+          btn.textContent = "✅ " + WalletManager.formatAddress(account);
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-ghost");
+          btn.onclick = () => (window.location.href = "role-select.html");
+
+          // Load total certs from blockchain
+          loadTotalCerts();
+        } else {
+          btn.textContent = "🦊 Connect Wallet";
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  LOAD TOTAL CERTIFICATES
+      // ─────────────────────────────────────────
+      async function loadTotalCerts() {
+        try {
+          const result = await ContractManager.getTotalCertificates();
+          if (result.success) {
+            document.getElementById("totalCerts").textContent = result.total;
+          }
+        } catch (e) {
+          // Silently fail — not critical
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD — restore session
+      // ─────────────────────────────────────────
+      window.addEventListener("load", async () => {
+        const account = WalletManager.restoreSession();
+        const btn = document.getElementById("connectBtn");
+
+        if (account) {
+          document.getElementById("walletAddress").textContent =
+            WalletManager.formatAddress(account);
+          document.getElementById("walletInfo").classList.remove("hidden");
+          document.getElementById("walletInfo").style.display = "inline-flex";
+
+          btn.textContent = "✅ " + WalletManager.formatAddress(account);
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-ghost");
+          btn.onclick = () => (window.location.href = "role-select.html");
+
+          loadTotalCerts();
+        }
+      });
+    </script>
+  </body>
+</html>

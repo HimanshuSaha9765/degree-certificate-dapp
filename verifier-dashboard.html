@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verifier Dashboard — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge verifier">Verifier</span>
+            <div class="wallet-badge">
+              <span class="dot"></span>
+              <span id="walletAddr">—</span>
+            </div>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <button
+              class="btn btn-ghost btn-sm"
+              onclick="WalletManager.disconnectWallet()"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main class="main-content">
+        <div class="container">
+          <!-- Page Header -->
+          <div style="margin-bottom: 32px">
+            <h2 style="margin-bottom: 6px">Verifier Dashboard</h2>
+            <p style="font-size: 14px; color: var(--text-muted)">
+              Search and verify degree certificates with full AI fraud analysis
+            </p>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 320px;
+              gap: 24px;
+              align-items: start;
+            "
+          >
+            <!-- ══════════════════════════════
+             LEFT — SEARCH + RESULTS
+        ══════════════════════════════ -->
+            <div>
+              <!-- Search Card -->
+              <div class="card" style="margin-bottom: 24px">
+                <div class="card-header">
+                  <div class="card-title">
+                    <div class="icon">🔍</div>
+                    Certificate Lookup
+                  </div>
+                </div>
+
+                <!-- Search bar -->
+                <div class="search-container">
+                  <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="Enter Certificate ID (e.g. GTU-2024-CS-001)"
+                    onkeydown="if (event.key === 'Enter') verifyCert();"
+                  />
+                  <button class="search-btn" onclick="verifyCert()">🔍</button>
+                </div>
+
+                <!-- Search history chips -->
+                <div id="historyArea" style="display: none">
+                  <div
+                    style="
+                      font-size: 12px;
+                      color: var(--text-muted);
+                      margin-bottom: 6px;
+                    "
+                  >
+                    Recent searches:
+                  </div>
+                  <div class="search-history" id="historyChips"></div>
+                </div>
+
+                <!-- Quick tips -->
+                <div class="alert alert-info" style="margin-top: 16px">
+                  <span class="alert-icon">💡</span>
+                  <span style="font-size: 13px">
+                    Enter the exact Certificate ID as shown on the student's
+                    certificate. IDs are case-sensitive. Press
+                    <strong>Enter</strong> or click 🔍 to search.
+                  </span>
+                </div>
+              </div>
+
+              <!-- Loading state -->
+              <div
+                id="loadingState"
+                class="hidden"
+                style="text-align: center; padding: 48px 0"
+              >
+                <div class="spinner"></div>
+                <p style="margin-top: 12px; color: var(--text-muted)">
+                  Querying blockchain...
+                </p>
+              </div>
+
+              <!-- Result area -->
+              <div id="resultArea"></div>
+
+              <!-- AI Analysis area (loads after result) -->
+              <div id="aiArea"></div>
+            </div>
+
+            <!-- ══════════════════════════════
+             RIGHT SIDEBAR
+        ══════════════════════════════ -->
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+                position: sticky;
+                top: 88px;
+              "
+            >
+              <!-- Stats -->
+              <div class="card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <div class="icon">📊</div>
+                    My Activity
+                  </div>
+                </div>
+                <div
+                  style="
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 14px;
+                      background: var(--bg-secondary);
+                      border-radius: var(--radius-md);
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 1.6rem;
+                        font-weight: 700;
+                        color: var(--primary);
+                      "
+                      id="stat-searches"
+                    >
+                      0
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      Searches
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 14px;
+                      background: var(--bg-secondary);
+                      border-radius: var(--radius-md);
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 1.6rem;
+                        font-weight: 700;
+                        color: var(--success);
+                      "
+                      id="stat-valid"
+                    >
+                      0
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      Valid Found
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 14px;
+                      background: var(--bg-secondary);
+                      border-radius: var(--radius-md);
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 1.6rem;
+                        font-weight: 700;
+                        color: var(--danger);
+                      "
+                      id="stat-invalid"
+                    >
+                      0
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      Invalid
+                    </div>
+                  </div>
+                  <div
+                    style="
+                      text-align: center;
+                      padding: 14px;
+                      background: var(--bg-secondary);
+                      border-radius: var(--radius-md);
+                    "
+                  >
+                    <div
+                      style="
+                        font-family: var(--font-display);
+                        font-size: 1.6rem;
+                        font-weight: 700;
+                        color: var(--warning);
+                      "
+                      id="stat-flagged"
+                    >
+                      0
+                    </div>
+                    <div
+                      style="
+                        font-size: 11px;
+                        color: var(--text-muted);
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                      "
+                    >
+                      Flagged
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Audit Log -->
+              <div class="card" style="padding: 0; overflow: hidden">
+                <div class="card-header" style="padding: 16px 20px">
+                  <div class="card-title">
+                    <div class="icon">📋</div>
+                    Verification Log
+                  </div>
+                  <button class="btn btn-ghost btn-sm" onclick="clearLog()">
+                    Clear
+                  </button>
+                </div>
+                <div id="auditLogEl" class="audit-log"></div>
+              </div>
+
+              <!-- Role switch -->
+              <div
+                class="card-flat"
+                style="
+                  background: var(--bg-secondary);
+                  text-align: center;
+                  padding: 16px;
+                "
+              >
+                <div
+                  style="
+                    font-size: 12px;
+                    color: var(--text-muted);
+                    margin-bottom: 10px;
+                  "
+                >
+                  Switch to a different role?
+                </div>
+                <a
+                  href="role-select.html"
+                  class="btn btn-ghost btn-sm btn-block"
+                >
+                  🔄 Change Role
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Blockchain Certificate Verification
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+    <script src="js/ai-engine.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  SESSION STATS (localStorage)
+      // ─────────────────────────────────────────
+      function getStats() {
+        try {
+          return (
+            JSON.parse(localStorage.getItem("verifier_stats")) || {
+              searches: 0,
+              valid: 0,
+              invalid: 0,
+              flagged: 0,
+            }
+          );
+        } catch {
+          return { searches: 0, valid: 0, invalid: 0, flagged: 0 };
+        }
+      }
+
+      function saveStats(s) {
+        localStorage.setItem("verifier_stats", JSON.stringify(s));
+      }
+
+      function updateStatDisplay() {
+        const s = getStats();
+        document.getElementById("stat-searches").textContent = s.searches;
+        document.getElementById("stat-valid").textContent = s.valid;
+        document.getElementById("stat-invalid").textContent = s.invalid;
+        document.getElementById("stat-flagged").textContent = s.flagged;
+      }
+
+      // ─────────────────────────────────────────
+      //  SEARCH HISTORY CHIPS
+      // ─────────────────────────────────────────
+      function renderHistory() {
+        const history = AuditLog.getSearchHistory();
+        const area = document.getElementById("historyArea");
+        const chips = document.getElementById("historyChips");
+
+        if (history.length === 0) {
+          area.style.display = "none";
+          return;
+        }
+
+        area.style.display = "block";
+        chips.innerHTML = history
+          .map(
+            (id) => `
+    <span class="search-history-chip"
+          onclick="searchFromHistory('${id}')">
+      ${id}
+    </span>
+  `,
+          )
+          .join("");
+      }
+
+      function searchFromHistory(certId) {
+        document.getElementById("searchInput").value = certId;
+        verifyCert();
+      }
+
+      // ─────────────────────────────────────────
+      //  MAIN VERIFY FUNCTION
+      // ─────────────────────────────────────────
+      async function verifyCert() {
+        const certId = document.getElementById("searchInput").value.trim();
+
+        if (!certId) {
+          document.getElementById("searchInput").focus();
+          return;
+        }
+
+        // Show loading
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("loadingState").style.display = "block";
+        document.getElementById("resultArea").innerHTML = "";
+        document.getElementById("aiArea").innerHTML = "";
+
+        // Save to search history
+        AuditLog.addSearch(certId);
+        renderHistory();
+
+        // Update stats
+        const stats = getStats();
+        stats.searches++;
+        saveStats(stats);
+        updateStatDisplay();
+
+        // Query blockchain
+        const result = await ContractManager.verifyCertificate(certId);
+
+        // Hide loading
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("loadingState").classList.add("hidden");
+
+        if (!result.success) {
+          showError(result.error);
+          return;
+        }
+
+        if (!result.exists) {
+          showNotFound(certId);
+          stats.invalid++;
+          saveStats(stats);
+          updateStatDisplay();
+          return;
+        }
+
+        // Show certificate result
+        showResult(certId, result);
+
+        // Run AI analysis
+        await runAIAnalysis(certId, result, stats);
+
+        // Log to audit
+        AuditLog.add("verifier", "verified", {
+          certId,
+          studentName: result.studentName,
+          status: result.isRevoked
+            ? "revoked"
+            : result.isExpired
+              ? "expired"
+              : result.isValid
+                ? "valid"
+                : "invalid",
+        });
+        AuditLog.renderTo("auditLogEl", "verifier", 15);
+      }
+
+      // ─────────────────────────────────────────
+      //  SHOW CERTIFICATE RESULT
+      // ─────────────────────────────────────────
+      function showResult(certId, cert) {
+        let cardClass, icon, title, statusBadge;
+
+        if (cert.isRevoked) {
+          cardClass = "revoked";
+          icon = "🚫";
+          title = "Certificate Revoked";
+          statusBadge = `<span class="badge badge-revoked">🚫 Revoked</span>`;
+        } else if (cert.isExpired) {
+          cardClass = "expired";
+          icon = "⏰";
+          title = "Certificate Expired";
+          statusBadge = `<span class="badge badge-expired">⏰ Expired</span>`;
+        } else if (cert.isValid) {
+          cardClass = "valid";
+          icon = "✅";
+          title = "Certificate Verified";
+          statusBadge = `<span class="badge badge-valid">✅ Valid</span>`;
+        } else {
+          cardClass = "not-found";
+          icon = "❓";
+          title = "Unknown Status";
+          statusBadge = `<span class="badge badge-invalid">❓ Unknown</span>`;
+        }
+
+        document.getElementById("resultArea").innerHTML = `
+    <div class="result-card ${cardClass} animate-fade-in-up">
+
+      <div class="result-header">
+        <div class="result-icon">${icon}</div>
+        <div>
+          <div class="result-title">${title}</div>
+          <div style="margin-top:4px">${statusBadge}</div>
+        </div>
+        <div style="margin-left:auto">
+          <button class="copy-btn"
+                  onclick="copyText('${certId}', this)">
+            📋 Copy ID
+          </button>
+        </div>
+      </div>
+
+      <div class="cert-detail-grid">
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Certificate ID</div>
+          <div class="cert-detail-value font-mono"
+               style="font-size:13px">${certId}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Student Name</div>
+          <div class="cert-detail-value">${cert.studentName}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Degree</div>
+          <div class="cert-detail-value">${cert.degree}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Institution</div>
+          <div class="cert-detail-value">${cert.institution}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Graduation Year</div>
+          <div class="cert-detail-value">${cert.year}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Issue Date</div>
+          <div class="cert-detail-value">${cert.issueDate}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Expiry Date</div>
+          <div class="cert-detail-value">${cert.expiryDate}</div>
+        </div>
+
+        <div class="cert-detail-item">
+          <div class="cert-detail-label">Issuer Wallet</div>
+          <div class="cert-detail-value font-mono"
+               style="font-size:11px">
+            ${cert.issuer}
+            <a href="https://sepolia.etherscan.io/address/${cert.issuer}"
+               target="_blank"
+               style="font-size:11px;margin-left:4px">↗</a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action buttons -->
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm"
+                onclick="scrollToAI()">
+          🤖 View AI Analysis ↓
+        </button>
+        <a href="ai-analysis.html"
+           class="btn btn-outline btn-sm"
+           onclick="storeCertForAnalysis('${certId}')">
+          📊 Full Report Page
+        </a>
+        <button class="btn btn-ghost btn-sm"
+                onclick="copyText('${certId}', this)">
+          📋 Copy ID
+        </button>
+      </div>
+    </div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  NOT FOUND
+      // ─────────────────────────────────────────
+      function showNotFound(certId) {
+        document.getElementById("resultArea").innerHTML = `
+    <div class="result-card not-found animate-fade-in-up">
+      <div class="result-header">
+        <div class="result-icon">❌</div>
+        <div>
+          <div class="result-title"
+               style="color:var(--danger)">
+            Certificate Not Found
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);
+                       margin-top:4px">
+            No certificate exists with ID:
+            <strong class="font-mono">${certId}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="alert alert-warning" style="margin-top:16px">
+        <span class="alert-icon">⚠️</span>
+        <span style="font-size:13px">
+          This certificate ID is not registered on the blockchain.
+          It may be fake, contain a typo, or not yet issued.
+          Please double-check the ID and try again.
+        </span>
+      </div>
+    </div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  ERROR
+      // ─────────────────────────────────────────
+      function showError(msg) {
+        document.getElementById("resultArea").innerHTML = `
+    <div class="alert alert-danger animate-fade-in">
+      <span class="alert-icon">❌</span>
+      <span>${msg || "An error occurred. Please try again."}</span>
+    </div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  RUN AI ANALYSIS
+      // ─────────────────────────────────────────
+      async function runAIAnalysis(certId, cert, stats) {
+        document.getElementById("aiArea").innerHTML = `
+    <div id="aiLoading"
+         style="text-align:center;padding:32px 0;margin-top:24px">
+      <div class="spinner"></div>
+      <p style="margin-top:12px;color:var(--text-muted);font-size:13px">
+        🤖 Running AI Fraud Analysis...
+      </p>
+    </div>`;
+
+        // Get extra blockchain data for AI
+        let issuerCerts = [];
+        let studentCerts = [];
+
+        try {
+          const issuerResult = await ContractManager.getCertsByIssuer(
+            cert.issuer,
+          );
+          if (issuerResult.success && Array.isArray(issuerResult.ids)) {
+            issuerCerts = issuerResult.ids;
+          }
+        } catch (e) {
+          console.warn("issuerCerts fetch failed:", e);
+        }
+
+        try {
+          const studentResult = await ContractManager.getCertsByStudentName(
+            cert.studentName,
+          );
+          if (studentResult.success && Array.isArray(studentResult.ids)) {
+            studentCerts = studentResult.ids;
+          }
+        } catch (e) {
+          console.warn("studentCerts fetch failed:", e);
+        }
+
+        // Run AI engine with safety check
+        let analysis = null;
+        try {
+          analysis = await AIEngine.analyze({
+            certId,
+            cert,
+            issuerCerts,
+            studentCerts,
+          });
+        } catch (e) {
+          console.error("AIEngine.analyze failed:", e);
+          // Build a minimal fallback analysis
+          analysis = {
+            score: cert.isValid ? 75 : 10,
+            riskLevel: cert.isValid ? "Medium Risk" : "High Risk",
+            summary: cert.isValid
+              ? "Certificate found on blockchain."
+              : "Certificate is invalid or revoked.",
+            recommendation: "Please verify directly with the institution.",
+            checks: [],
+            flags: [],
+            scoreBreakdown: [],
+            analyzedAt: new Date().toISOString(),
+          };
+        }
+
+        // Ensure all arrays exist
+        analysis.checks = analysis.checks || [];
+        analysis.flags = analysis.flags || [];
+        analysis.scoreBreakdown = analysis.scoreBreakdown || [];
+
+        // Update stats
+        if (cert.isValid) stats.valid++;
+        else stats.invalid++;
+        if (analysis.riskLevel === "High Risk") stats.flagged++;
+        saveStats(stats);
+        updateStatDisplay();
+
+        // Store for full report page
+        localStorage.setItem(
+          "lastVerifiedCert",
+          JSON.stringify({ certId, cert, analysis }),
+        );
+
+        // Render AI panel
+        renderAIPanel(analysis);
+      }
+
+      // ─────────────────────────────────────────
+      //  RENDER AI PANEL (VERIFIER — FULL DETAIL)
+      // ─────────────────────────────────────────
+      function renderAIPanel(analysis) {
+        // Safety guards — ensure arrays exist
+        if (!analysis) {
+          document.getElementById("aiArea").innerHTML =
+            `<div class="alert alert-warning" style="margin-top:24px">
+         <span class="alert-icon">⚠️</span>
+         <span>AI analysis could not be completed.</span>
+       </div>`;
+          return;
+        }
+
+        analysis.checks = analysis.checks || [];
+        analysis.flags = analysis.flags || [];
+        analysis.scoreBreakdown = analysis.scoreBreakdown || [];
+        const scoreColor =
+          analysis.score >= 80
+            ? "var(--success)"
+            : analysis.score >= 50
+              ? "var(--warning)"
+              : "var(--danger)";
+
+        const riskBadge =
+          analysis.riskLevel === "Safe"
+            ? `<span class="badge badge-safe">✅ Safe</span>`
+            : analysis.riskLevel === "Medium Risk"
+              ? `<span class="badge badge-warning">⚠️ Medium Risk</span>`
+              : `<span class="badge badge-risky">🚨 High Risk</span>`;
+
+        const flagsHtml = analysis.flags
+          .map(
+            (flag) => `
+    <div class="ai-flag ${flag.type}">
+      <div class="ai-flag-icon">${flag.icon}</div>
+      <div class="ai-flag-text">
+        <div class="ai-flag-title">${flag.title}</div>
+        <div class="ai-flag-desc">${flag.description}</div>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+
+        const checksHtml = analysis.checks
+          .map(
+            (check) => `
+    <div style="display:flex;align-items:center;gap:10px;
+                 padding:8px 0;border-bottom:1px solid var(--border);
+                 font-size:13px">
+      <span style="font-size:16px">${check.passed ? "✅" : "❌"}</span>
+      <div style="flex:1">
+        <div style="font-weight:600;color:var(--text-primary)">
+          ${check.name}
+        </div>
+        <div style="color:var(--text-muted);font-size:12px">
+          ${check.detail}
+        </div>
+      </div>
+      <span style="font-size:12px;font-weight:600;
+                    color:${check.passed ? "var(--success)" : "var(--danger)"}">
+        ${check.passed ? "PASS" : "FAIL"}
+      </span>
+    </div>
+  `,
+          )
+          .join("");
+
+        document.getElementById("aiArea").innerHTML = `
+    <div id="aiAnalysisSection"
+         class="ai-panel animate-fade-in-up"
+         style="margin-top:24px">
+
+      <!-- Header -->
+      <div class="ai-panel-header">
+        <div style="font-size:1.5rem">🤖</div>
+        <div>
+          <h3>AI Fraud Detection Report</h3>
+          <div style="font-size:12px;color:rgba(255,255,255,0.7);
+                       margin-top:2px">
+            Rule-based certificate intelligence analysis
+          </div>
+        </div>
+        <div style="margin-left:auto">${riskBadge}</div>
+      </div>
+
+      <div class="ai-panel-body">
+
+        <!-- Trust Score + Summary row -->
+        <div style="display:grid;grid-template-columns:160px 1fr;
+                     gap:24px;margin-bottom:28px;align-items:center">
+
+          <!-- Score ring -->
+          <div class="trust-score-container" style="padding:16px">
+            <div class="trust-score-ring"
+                 style="--score-pct:${analysis.score}%;
+                         background:conic-gradient(
+                           ${scoreColor} ${analysis.score}%,
+                           var(--bg-secondary) 0%)">
+              <div class="trust-score-number"
+                   style="color:${scoreColor}">
+                ${analysis.score}
+              </div>
+            </div>
+            <div class="trust-score-label">Trust Score</div>
+            <div style="margin-top:6px">${riskBadge}</div>
+          </div>
+
+          <!-- Summary -->
+          <div>
+            <div style="font-size:15px;font-weight:600;
+                         color:var(--text-primary);margin-bottom:8px">
+              ${analysis.summary}
+            </div>
+            <div style="font-size:13px;color:var(--text-secondary);
+                         line-height:1.6">
+              ${analysis.recommendation}
+            </div>
+            <div style="margin-top:12px;font-size:12px;
+                         color:var(--text-muted)">
+              Analysis ran ${new Date().toLocaleTimeString()} •
+              ${analysis.checks.length} checks performed •
+              ${analysis.flags.length} flag(s) raised
+            </div>
+          </div>
+        </div>
+
+        <!-- Flags -->
+        ${
+          analysis.flags.length > 0
+            ? `
+          <div style="margin-bottom:24px">
+            <div style="font-size:13px;font-weight:700;
+                         text-transform:uppercase;letter-spacing:0.5px;
+                         color:var(--text-muted);margin-bottom:12px">
+              ⚠️ Flags Raised (${analysis.flags.length})
+            </div>
+            ${flagsHtml}
+          </div>
+        `
+            : `
+          <div class="alert alert-success" style="margin-bottom:24px">
+            <span class="alert-icon">✅</span>
+            <span>No suspicious flags detected for this certificate.</span>
+          </div>
+        `
+        }
+
+        <!-- Detailed Checks -->
+        <div>
+          <div style="font-size:13px;font-weight:700;
+                       text-transform:uppercase;letter-spacing:0.5px;
+                       color:var(--text-muted);margin-bottom:8px">
+            🔬 Detailed Checks (${analysis.checks.length})
+          </div>
+          ${checksHtml}
+        </div>
+
+        <!-- Full report link -->
+        <div style="margin-top:20px;text-align:center">
+          <a href="ai-analysis.html"
+             class="btn btn-primary"
+             onclick="return true">
+            📊 View Full Analysis Report Page
+          </a>
+        </div>
+
+      </div>
+    </div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  STORE CERT + ANALYSIS FOR REPORT PAGE
+      // ─────────────────────────────────────────
+      function storeCertForAnalysis(certId, cert, analysis) {
+        if (cert && analysis) {
+          localStorage.setItem(
+            "lastVerifiedCert",
+            JSON.stringify({ certId, cert, analysis }),
+          );
+        }
+      }
+
+      // ─────────────────────────────────────────
+      //  SCROLL TO AI SECTION
+      // ─────────────────────────────────────────
+      function scrollToAI() {
+        const el = document.getElementById("aiAnalysisSection");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      // ─────────────────────────────────────────
+      //  COPY TEXT
+      // ─────────────────────────────────────────
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = "✅ Copied";
+          setTimeout(() => (btn.textContent = orig), 1500);
+        });
+      }
+
+      // ─────────────────────────────────────────
+      //  CLEAR AUDIT LOG
+      // ─────────────────────────────────────────
+      function clearLog() {
+        AuditLog.clear("verifier");
+        AuditLog.renderTo("auditLogEl", "verifier");
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD
+      // ─────────────────────────────────────────
+      window.addEventListener("load", async () => {
+        const account = WalletManager.requireWallet();
+        if (!account) return;
+        WalletManager.requireRole(["verifier"]);
+
+        document.getElementById("walletAddr").textContent =
+          WalletManager.formatAddress(account);
+
+        // Render search history + audit log + stats
+        renderHistory();
+        AuditLog.renderTo("auditLogEl", "verifier", 15);
+        updateStatDisplay();
+
+        // Check if coming from issuer dashboard with a quick verify ID
+        const quickId = localStorage.getItem("quickVerifyCertId");
+        if (quickId) {
+          document.getElementById("searchInput").value = quickId;
+          localStorage.removeItem("quickVerifyCertId");
+          await verifyCert();
+        }
+      });
+    </script>
+  </body>
+</html>

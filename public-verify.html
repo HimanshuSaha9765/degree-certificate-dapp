@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Certificate — CertChain</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>"
+    />
+  </head>
+  <body>
+    <div class="page-wrapper">
+      <!-- ═══════════════════════════════════════
+       NAVBAR
+  ═══════════════════════════════════════ -->
+      <nav class="navbar">
+        <div class="navbar-inner">
+          <a href="index.html" class="navbar-brand">
+            <div class="brand-icon">🎓</div>
+            <span>CertChain</span>
+          </a>
+          <div class="navbar-actions">
+            <span class="role-badge public">Public</span>
+            <button class="dark-toggle" onclick="toggleDark()">🌙</button>
+            <a href="role-select.html" class="btn btn-ghost btn-sm">
+              Switch Role
+            </a>
+            <a href="index.html" class="btn btn-primary btn-sm"> 🏠 Home </a>
+          </div>
+        </div>
+      </nav>
+
+      <!-- ═══════════════════════════════════════
+       HERO SEARCH SECTION
+  ═══════════════════════════════════════ -->
+      <section
+        style="
+          background: linear-gradient(
+            135deg,
+            var(--primary) 0%,
+            var(--primary-light) 100%
+          );
+          padding: 60px 24px 80px;
+          text-align: center;
+          position: relative;
+          overflow: hidden;
+        "
+      >
+        <!-- bg circles -->
+        <div
+          style="
+            position: absolute;
+            top: -40px;
+            left: -40px;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.04);
+          "
+        ></div>
+        <div
+          style="
+            position: absolute;
+            bottom: -60px;
+            right: -20px;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.03);
+          "
+        ></div>
+
+        <!-- wave bottom -->
+        <div
+          style="
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 48px;
+            background: var(--bg);
+            clip-path: ellipse(55% 100% at 50% 100%);
+          "
+        ></div>
+
+        <div
+          style="
+            position: relative;
+            z-index: 1;
+            max-width: 600px;
+            margin: 0 auto;
+          "
+        >
+          <div style="font-size: 3rem; margin-bottom: 16px">🔍</div>
+          <h1 style="color: white; margin-bottom: 12px">
+            Verify a Certificate
+          </h1>
+          <p
+            style="
+              color: rgba(255, 255, 255, 0.8);
+              font-size: 15px;
+              margin-bottom: 32px;
+            "
+          >
+            Enter the Certificate ID shown on the document or scan the QR code
+            to verify instantly.
+          </p>
+
+          <!-- Big search bar -->
+          <div style="position: relative; max-width: 500px; margin: 0 auto">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Enter Certificate ID..."
+              style="
+                width: 100%;
+                padding: 18px 70px 18px 24px;
+                border: none;
+                border-radius: var(--radius-xl);
+                font-size: 16px;
+                font-family: var(--font-body);
+                outline: none;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+                background: white;
+                color: var(--text-primary);
+              "
+              onkeydown="if (event.key === 'Enter') verifyCert();"
+            />
+            <button
+              onclick="verifyCert()"
+              style="
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 48px;
+                height: 48px;
+                background: var(--primary);
+                border: none;
+                border-radius: var(--radius-md);
+                color: white;
+                font-size: 20px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all var(--transition);
+              "
+            >
+              🔍
+            </button>
+          </div>
+
+          <!-- Search history chips -->
+          <div
+            id="historyRow"
+            style="
+              display: none;
+              margin-top: 16px;
+              justify-content: center;
+              flex-wrap: wrap;
+              gap: 8px;
+            "
+          >
+            <span style="font-size: 12px; color: rgba(255, 255, 255, 0.6)">
+              Recent:
+            </span>
+            <div
+              id="historyChips"
+              style="display: flex; gap: 8px; flex-wrap: wrap"
+            ></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ═══════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════ -->
+      <main style="padding: 40px 0 80px">
+        <div class="container-sm">
+          <!-- Loading -->
+          <div
+            id="loadingState"
+            class="hidden"
+            style="text-align: center; padding: 48px 0"
+          >
+            <div class="spinner"></div>
+            <p
+              style="
+                margin-top: 12px;
+                color: var(--text-muted);
+                font-size: 14px;
+              "
+            >
+              Checking blockchain...
+            </p>
+          </div>
+
+          <!-- Result area -->
+          <div id="resultArea"></div>
+
+          <!-- ─── DEFAULT STATE (before search) ─── -->
+          <div id="defaultState">
+            <!-- How to verify -->
+            <div class="card" style="margin-bottom: 20px">
+              <div class="card-header">
+                <div class="card-title">
+                  <div class="icon">❓</div>
+                  How to Verify
+                </div>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; gap: 12px; align-items: flex-start">
+                  <div
+                    style="
+                      width: 28px;
+                      height: 28px;
+                      background: var(--primary);
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: white;
+                      font-size: 12px;
+                      font-weight: 700;
+                      flex-shrink: 0;
+                    "
+                  >
+                    1
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      Find the Certificate ID
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-muted)">
+                      Look for the Certificate ID printed on the physical or
+                      digital certificate document
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start">
+                  <div
+                    style="
+                      width: 28px;
+                      height: 28px;
+                      background: var(--accent);
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: white;
+                      font-size: 12px;
+                      font-weight: 700;
+                      flex-shrink: 0;
+                    "
+                  >
+                    2
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      Enter or Scan
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-muted)">
+                      Type the ID above or scan the QR code on the certificate
+                      with your phone camera
+                    </div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start">
+                  <div
+                    style="
+                      width: 28px;
+                      height: 28px;
+                      background: var(--success);
+                      border-radius: 50%;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      color: white;
+                      font-size: 12px;
+                      font-weight: 700;
+                      flex-shrink: 0;
+                    "
+                  >
+                    3
+                  </div>
+                  <div>
+                    <div
+                      style="
+                        font-weight: 600;
+                        font-size: 14px;
+                        margin-bottom: 3px;
+                      "
+                    >
+                      Get Instant Result
+                    </div>
+                    <div style="font-size: 13px; color: var(--text-muted)">
+                      See whether the certificate is ✅ Safe, ⚠️ Warning, or 🚨
+                      Risky instantly
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Trust indicators explained -->
+            <div class="card-flat" style="background: var(--bg-secondary)">
+              <div
+                style="
+                  font-size: 13px;
+                  font-weight: 600;
+                  color: var(--text-muted);
+                  text-transform: uppercase;
+                  letter-spacing: 0.5px;
+                  margin-bottom: 14px;
+                "
+              >
+                What the result labels mean
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-safe"
+                    style="min-width: 80px; justify-content: center"
+                  >
+                    ✅ Safe
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Certificate is valid, verified on blockchain, no suspicious
+                    patterns detected
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-warning"
+                    style="min-width: 80px; justify-content: center"
+                  >
+                    ⚠️ Warning
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Certificate exists but has some unusual patterns — verify
+                    further with the institution
+                  </span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px">
+                  <span
+                    class="badge badge-risky"
+                    style="min-width: 80px; justify-content: center"
+                  >
+                    🚨 Risky
+                  </span>
+                  <span style="font-size: 13px; color: var(--text-secondary)">
+                    Certificate is revoked, expired, not found, or has high
+                    fraud risk — do not trust
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer class="footer">
+        <div class="container">
+          <p>
+            <strong>CertChain</strong> — Free public certificate verification
+            <br />
+            <span style="font-size: 12px; opacity: 0.7">
+              No account needed • No wallet required • Powered by Ethereum
+              blockchain
+            </span>
+          </p>
+        </div>
+      </footer>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/wallet.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/audit-log.js"></script>
+    <script src="js/ai-engine.js"></script>
+
+    <script>
+      // ─────────────────────────────────────────
+      //  DARK MODE
+      // ─────────────────────────────────────────
+      function toggleDark() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute("data-theme") === "dark";
+        html.setAttribute("data-theme", isDark ? "light" : "dark");
+        document.querySelector(".dark-toggle").textContent = isDark
+          ? "🌙"
+          : "☀️";
+        localStorage.setItem("theme", isDark ? "light" : "dark");
+      }
+      (function () {
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.querySelector(".dark-toggle");
+          if (btn) btn.textContent = saved === "dark" ? "☀️" : "🌙";
+        });
+      })();
+
+      // ─────────────────────────────────────────
+      //  SEARCH HISTORY
+      // ─────────────────────────────────────────
+      function renderHistory() {
+        const history = AuditLog.getSearchHistory();
+        const row = document.getElementById("historyRow");
+        const chips = document.getElementById("historyChips");
+
+        if (history.length === 0) {
+          row.style.display = "none";
+          return;
+        }
+
+        row.style.display = "flex";
+        chips.innerHTML = history
+          .map(
+            (id) => `
+    <span onclick="fillAndSearch('${id}')"
+          style="padding:4px 12px;
+                  background:rgba(255,255,255,0.15);
+                  border:1px solid rgba(255,255,255,0.25);
+                  border-radius:var(--radius-full);
+                  font-size:12px;color:white;cursor:pointer;
+                  font-family:var(--font-mono);
+                  transition:all var(--transition)"
+          onmouseover="this.style.background='rgba(255,255,255,0.25)'"
+          onmouseout="this.style.background='rgba(255,255,255,0.15)'">
+      ${id}
+    </span>
+  `,
+          )
+          .join("");
+      }
+
+      function fillAndSearch(certId) {
+        document.getElementById("searchInput").value = certId;
+        verifyCert();
+      }
+
+      // ─────────────────────────────────────────
+      //  MAIN VERIFY
+      // ─────────────────────────────────────────
+      async function verifyCert() {
+        const certId = document.getElementById("searchInput").value.trim();
+        if (!certId) {
+          document.getElementById("searchInput").focus();
+          return;
+        }
+
+        // Hide default state, show loading
+        document.getElementById("defaultState").style.display = "none";
+        document.getElementById("loadingState").classList.remove("hidden");
+        document.getElementById("loadingState").style.display = "block";
+        document.getElementById("resultArea").innerHTML = "";
+
+        // Save to history
+        AuditLog.addSearch(certId);
+        renderHistory();
+
+        // Query blockchain
+        const result = await ContractManager.getCertificate(certId);
+
+        // Hide loading
+        document.getElementById("loadingState").style.display = "none";
+        document.getElementById("loadingState").classList.add("hidden");
+
+        if (!result.success) {
+          showSimpleResult("risky", certId, null, "error");
+          return;
+        }
+
+        if (!result.exists) {
+          showSimpleResult("risky", certId, null, "notfound");
+          return;
+        }
+
+        // Run simplified AI for public label
+        let trustLabel = "safe";
+        try {
+          const analysis = AIEngine.analyzeSimple({
+            certId,
+            cert: result,
+          });
+          trustLabel = analysis.label; // "safe" | "warning" | "risky"
+        } catch (e) {
+          // Fallback: determine from cert status
+          if (result.isRevoked || result.isExpired) {
+            trustLabel = "risky";
+          } else if (result.isValid) {
+            trustLabel = "safe";
+          }
+        }
+
+        showSimpleResult(trustLabel, certId, result, "found");
+      }
+
+      // ─────────────────────────────────────────
+      //  SHOW SIMPLIFIED RESULT (PUBLIC VIEW)
+      // ─────────────────────────────────────────
+      function showSimpleResult(label, certId, cert, state) {
+        // Label config
+        const labelConfig = {
+          safe: {
+            icon: "✅",
+            title: "Certificate Looks Safe",
+            color: "var(--success)",
+            bg: "var(--success-bg)",
+            border: "var(--success)",
+            badgeClass: "badge-safe",
+            badgeText: "✅ Safe",
+            message:
+              "This certificate was found on the blockchain and passed basic verification checks.",
+          },
+          warning: {
+            icon: "⚠️",
+            title: "Proceed with Caution",
+            color: "var(--warning)",
+            bg: "var(--warning-bg)",
+            border: "var(--warning)",
+            badgeClass: "badge-warning",
+            badgeText: "⚠️ Warning",
+            message:
+              "This certificate exists but has some unusual patterns. We recommend contacting the institution directly to confirm.",
+          },
+          risky: {
+            icon: "🚨",
+            title: "Do Not Trust",
+            color: "var(--danger)",
+            bg: "var(--danger-bg)",
+            border: "var(--danger)",
+            badgeClass: "badge-risky",
+            badgeText: "🚨 Risky",
+            message:
+              state === "notfound"
+                ? "No certificate with this ID was found on the blockchain. It may be fake or contain a typo."
+                : state === "error"
+                  ? "Could not connect to the blockchain. Please check your internet connection and try again."
+                  : "This certificate has been revoked or has expired. It is no longer valid.",
+          },
+        };
+
+        const cfg = labelConfig[label] || labelConfig.risky;
+
+        // Build certificate details section (only if found)
+        let detailsHtml = "";
+        if (cert && state === "found") {
+          let statusBadge = "";
+          if (cert.isRevoked) {
+            statusBadge = `<span class="badge badge-revoked">🚫 Revoked</span>`;
+          } else if (cert.isExpired) {
+            statusBadge = `<span class="badge badge-expired">⏰ Expired</span>`;
+          } else {
+            statusBadge = `<span class="badge badge-valid">✅ Valid</span>`;
+          }
+
+          detailsHtml = `
+        <div style="background:rgba(255,255,255,0.6);
+                   border-radius:var(--radius-md);
+                   padding:18px;margin-top:18px">
+
+        <div style="display:flex;justify-content:space-between;
+                     align-items:center;margin-bottom:14px;
+                     flex-wrap:wrap;gap:8px">
+          <div style="font-size:13px;font-weight:700;
+                       text-transform:uppercase;
+                       letter-spacing:0.5px;
+                       color:var(--text-muted)">
+            Certificate Details
+          </div>
+          ${statusBadge}
+        </div>
+
+        <div style="display:grid;
+                     grid-template-columns:repeat(auto-fit,
+                       minmax(160px,1fr));
+                     gap:12px">
+          ${[
+            { label: "Student Name", value: cert.studentName },
+            { label: "Degree", value: cert.degree },
+            { label: "Institution", value: cert.institution },
+            { label: "Year", value: cert.year },
+            { label: "Issue Date", value: cert.issueDate },
+            { label: "Certificate ID", value: certId, mono: true },
+          ]
+            .map(
+              (d) => `
+            <div>
+              <div style="font-size:10px;text-transform:uppercase;
+                           letter-spacing:0.5px;
+                           color:var(--text-muted);
+                           margin-bottom:3px;font-weight:600">
+                ${d.label}
+              </div>
+              <div style="font-size:13px;font-weight:600;
+                           color:var(--text-primary);
+                           ${d.mono ? "font-family:var(--font-mono);" : ""}">
+                ${d.value || "—"}
+              </div>
+            </div>`,
+            )
+            .join("")}
+        </div>
+      </div>`;
+        }
+
+        // Build not-found tip
+        let tipHtml = "";
+        if (state === "notfound") {
+          tipHtml = `
+      <div style="background:rgba(255,255,255,0.5);
+                   border-radius:var(--radius-md);
+                   padding:14px;margin-top:14px;
+                   font-size:13px;color:var(--text-secondary)">
+        <strong>Common reasons:</strong>
+        <ul style="margin:6px 0 0 18px;
+                    display:flex;flex-direction:column;gap:4px">
+          <li>The Certificate ID was typed incorrectly</li>
+          <li>The certificate may be forged or fake</li>
+          <li>The institution has not yet issued it on blockchain</li>
+          <li>There may be extra spaces in the ID</li>
+        </ul>
+      </div>`;
+        }
+
+        document.getElementById("resultArea").innerHTML = `
+    <div style="background:${cfg.bg};
+                 border:2px solid ${cfg.border};
+                 border-radius:var(--radius-xl);
+                 padding:28px;
+                 animation:fadeInUp 0.4s ease">
+
+      <!-- Result header -->
+      <div style="display:flex;align-items:center;
+                   gap:16px;margin-bottom:8px">
+        <div style="font-size:3rem;line-height:1">${cfg.icon}</div>
+        <div style="flex:1">
+          <div style="font-family:var(--font-display);
+                       font-size:1.4rem;font-weight:700;
+                       color:${cfg.color};margin-bottom:4px">
+            ${cfg.title}
+          </div>
+          <span class="badge ${cfg.badgeClass}">
+            ${cfg.badgeText}
+          </span>
+        </div>
+      </div>
+
+      <!-- Message -->
+      <p style="font-size:14px;color:var(--text-secondary);
+                 line-height:1.6;margin:14px 0 0">
+        ${cfg.message}
+      </p>
+
+      ${detailsHtml}
+      ${tipHtml}
+
+      <!-- Actions -->
+      <div style="display:flex;gap:10px;margin-top:20px;
+                   flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm"
+                onclick="resetSearch()"
+                style="background:rgba(255,255,255,0.5)">
+          🔍 Search Again
+        </button>
+        ${
+          cert && cert.isValid
+            ? `
+          <button class="btn btn-ghost btn-sm"
+                  onclick="copyText('${certId}', this)"
+                  style="background:rgba(255,255,255,0.5)">
+            📋 Copy ID
+          </button>`
+            : ""
+        }
+        <a href="role-select.html"
+           class="btn btn-ghost btn-sm"
+           style="background:rgba(255,255,255,0.5)">
+          🔒 Advanced Verify (Login)
+        </a>
+      </div>
+
+      <!-- Disclaimer -->
+      <div style="margin-top:16px;padding-top:14px;
+                   border-top:1px solid rgba(0,0,0,0.08);
+                   font-size:11px;color:var(--text-muted)">
+        🔗 Verified against Sepolia blockchain •
+        Data is read-only and publicly accessible •
+        For detailed fraud analysis,
+        <a href="role-select.html"
+           style="color:${cfg.color}">
+          login as Verifier
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Search another -->
+    <div style="text-align:center;margin-top:24px">
+      <button class="btn btn-outline"
+              onclick="resetSearch()">
+        🔍 Verify Another Certificate
+      </button>
+    </div>`;
+      }
+
+      // ─────────────────────────────────────────
+      //  RESET SEARCH
+      // ─────────────────────────────────────────
+      function resetSearch() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("resultArea").innerHTML = "";
+        document.getElementById("defaultState").style.display = "block";
+        document.getElementById("searchInput").focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      // ─────────────────────────────────────────
+      //  COPY TEXT
+      // ─────────────────────────────────────────
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+          const orig = btn.textContent;
+          btn.textContent = "✅ Copied";
+          setTimeout(() => (btn.textContent = orig), 1500);
+        });
+      }
+
+      // ─────────────────────────────────────────
+      //  ON PAGE LOAD — check for QR param
+      // ─────────────────────────────────────────
+      window.addEventListener("load", () => {
+        // Restore theme
+        const saved = localStorage.getItem("theme") || "light";
+        document.documentElement.setAttribute("data-theme", saved);
+
+        // Render search history
+        renderHistory();
+
+        // Check URL for ?id= parameter (from QR code scan)
+        const params = new URLSearchParams(window.location.search);
+        const idParam = params.get("id");
+        if (idParam) {
+          document.getElementById("searchInput").value = idParam;
+          verifyCert();
+        }
+      });
+    </script>
+  </body>
+</html>
