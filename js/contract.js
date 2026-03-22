@@ -10,10 +10,23 @@ const ContractManager = {
 
   // Read-only (no gas, free)
   getReadContract() {
-    const provider = WalletManager.getProvider();
-    if (!provider) return null;
-    return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
-  },
+      // If MetaMask available — use it
+      if (WalletManager.isMetaMaskInstalled()) {
+        const provider = WalletManager.getProvider();
+        if (provider) {
+          return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, provider);
+        }
+      }
+
+      // ── FALLBACK: Public RPC for mobile/no-wallet browsers ──
+      // Uses Sepolia public RPC — no API key needed
+      const fallbackProvider = new ethers.providers.JsonRpcProvider(
+        "https://rpc.sepolia.org"
+      );
+      return new ethers.Contract(
+        CONTRACT_ADDRESS, CONTRACT_ABI, fallbackProvider
+      );
+    },
 
   // Write (costs gas, needs signer)
   getWriteContract() {
@@ -156,105 +169,123 @@ const ContractManager = {
   // ──────────────────────────────────────────
 
   async getCertificate(certId) {
-    try {
-      const contract = this.getReadContract();
-      const result = await contract.getCertificate(certId);
+      try {
+        const contract = this.getReadContract();
+        if (!contract) {
+          return { success: false, error: "Could not connect to blockchain" };
+        }
 
-      if (!result.exists) {
-        return { success: true, exists: false };
-      }
+        const result = await contract.getCertificate(certId);
 
-      // Check expiry on frontend
-      const now = Math.floor(Date.now() / 1000);
-      const expiryTs = result.expiryDate.toNumber();
-      const isExpired = expiryTs > 0 && now > expiryTs;
-      const isValid = result.exists && !result.isRevoked && !isExpired;
+        if (!result.exists) {
+          return { success: true, exists: false };
+        }
 
-      return {
-        success: true,
-        exists: true,
-        isValid,
-        isRevoked: result.isRevoked,
-        isExpired,
-        studentName: result.studentName,
-        degree: result.degree,
-        institution: result.institution,
-        year: result.year,
-        issueDate: new Date(
-          result.issueDate.toNumber() * 1000,
-        ).toLocaleDateString("en-IN", {
-          day: "numeric",
-          month: "long",
-          year: "numeric",
-        }),
-        issueDateRaw: result.issueDate.toNumber(),
-        expiryDate:
-          expiryTs > 0
-            ? new Date(expiryTs * 1000).toLocaleDateString()
+        // Safe number conversion (works on mobile too)
+        const issueDateNum  = result.issueDate
+          ? (result.issueDate.toNumber
+              ? result.issueDate.toNumber()
+              : Number(result.issueDate))
+          : 0;
+
+        const expiryDateNum = result.expiryDate
+          ? (result.expiryDate.toNumber
+              ? result.expiryDate.toNumber()
+              : Number(result.expiryDate))
+          : 0;
+
+        const now       = Math.floor(Date.now() / 1000);
+        const isExpired = expiryDateNum > 0 && now > expiryDateNum;
+        const isValid   = result.exists && !result.isRevoked && !isExpired;
+
+        return {
+          success     : true,
+          exists      : true,
+          isValid,
+          isRevoked   : result.isRevoked,
+          isExpired,
+          studentName : result.studentName,
+          degree      : result.degree,
+          institution : result.institution,
+          year        : result.year,
+          issueDate   : issueDateNum > 0
+            ? new Date(issueDateNum * 1000).toLocaleDateString("en-IN", {
+                day: "numeric", month: "long", year: "numeric"
+              })
+            : "—",
+          issueDateRaw : issueDateNum,
+          expiryDate   : expiryDateNum > 0
+            ? new Date(expiryDateNum * 1000).toLocaleDateString("en-IN", {
+                day: "numeric", month: "long", year: "numeric"
+              })
             : "No Expiry",
-        expiryDateRaw: expiryTs,
-        issuer: result.issuer,
-      };
-    } catch (error) {
-      return this._handleError(error);
-    }
-  },
+          expiryDateRaw: expiryDateNum,
+          issuer       : result.issuer
+        };
+      } catch (error) {
+        return this._handleError(error);
+      }
+    },
 
   // ──────────────────────────────────────────
   //  GET CERTS BY ISSUER
   // ──────────────────────────────────────────
 
   async getCertsByIssuer(address) {
-    try {
-      const contract = this.getReadContract();
-      const ids = await contract.getCertsByIssuer(address);
-      return { success: true, ids };
-    } catch (error) {
-      return this._handleError(error);
-    }
-  },
+      try {
+        const contract = this.getReadContract();
+        if (!contract) return { success: false, ids: [] };
+        const ids = await contract.getCertsByIssuer(address);
+        return { success: true, ids };
+      } catch (error) {
+        return { success: false, ids: [] };
+      }
+    },
 
   // ──────────────────────────────────────────
   //  GET CERTS BY STUDENT NAME (for AI)
   // ──────────────────────────────────────────
 
   async getCertsByStudentName(name) {
-    try {
-      const contract = this.getReadContract();
-      const ids = await contract.getCertsByStudentName(name);
-      return { success: true, ids };
-    } catch (error) {
-      return this._handleError(error);
-    }
-  },
+      try {
+        const contract = this.getReadContract();
+        if (!contract) return { success: false, ids: [] };
+        const ids = await contract.getCertsByStudentName(name);
+        return { success: true, ids };
+      } catch (error) {
+        return { success: false, ids: [] };
+      }
+    },
 
   // ──────────────────────────────────────────
   //  GET TOTAL CERTIFICATES
   // ──────────────────────────────────────────
 
   async getTotalCertificates() {
-    try {
-      const contract = this.getReadContract();
-      const total = await contract.getTotalCertificates();
-      return { success: true, total: total.toNumber() };
-    } catch (error) {
-      return this._handleError(error);
-    }
-  },
+      try {
+        const contract = this.getReadContract();
+        if (!contract) return { success: false, total: 0 };
+        const total = await contract.getTotalCertificates();
+        return { success: true, total: total.toNumber() };
+      } catch (error) {
+        return { success: false, total: 0 };
+      }
+    },
 
   // ──────────────────────────────────────────
   //  CHECK IF CERT ID EXISTS
   // ──────────────────────────────────────────
 
   async certIdExists(certId) {
-    try {
-      const contract = this.getReadContract();
-      const exists = await contract.certIdExists(certId);
-      return { success: true, exists };
-    } catch (error) {
-      return this._handleError(error);
-    }
-  },
+      try {
+        const contract = this.getReadContract();
+        if (!contract) return { success: false, exists: false };
+        const exists = await contract.certIdExists(certId);
+        return { success: true, exists };
+      } catch (error) {
+        return { success: false, exists: false };
+      }
+    },
 
   // ──────────────────────────────────────────
   //  HELPER: SHOW PENDING / SUCCESS TOAST
